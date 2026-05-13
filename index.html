@@ -508,13 +508,17 @@
   /* ===== LOGIN OVERLAY ===== */
   #login-overlay {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100dvh;
     background: linear-gradient(135deg, #0d2666 0%, #1a4db5 50%, #3a7bd5 100%);
-    z-index: 9999;
+    z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Cairo', sans-serif;
+    overflow: hidden;
   }
   .login-box {
     background: white;
@@ -967,7 +971,7 @@
       </div>
       <table class="users-table">
         <thead>
-          <tr><th>#</th><th>اسم المستخدم</th><th>الصلاحية</th><th>الفرع</th><th>إجراءات</th></tr>
+          <tr><th>#</th><th>اسم المستخدم</th><th>الصلاحية</th><th>الفرع</th><th>كلمة المرور</th><th>إجراءات</th></tr>
         </thead>
         <tbody id="tbody-users"></tbody>
       </table>
@@ -979,26 +983,45 @@
 <script>
 // ============ AUTH SYSTEM WITH LOCALSTORAGE ============
 const DEFAULT_USERS = [
-  { username: 'Sahab',   password: 'Aa@123456', role: 'admin',      location: '' },
-  { username: 'Super',   password: 'Aa@123456', role: 'supervisor', location: 'MTC105' },
-  { username: 'MT00455', password: 'Aa@123456', role: 'staff',      location: 'MTC101' },
-  { username: 'MT00456', password: 'Aa@123456', role: 'staff',      location: 'MTC102' },
-  { username: 'MT00457', password: 'Aa@123456', role: 'staff',      location: 'MTC103' },
-  { username: 'MT00466', password: 'Aa@123456', role: 'staff',      location: 'MTC106' },
-  { username: 'MT00470', password: 'Aa@123456', role: 'staff',      location: 'MTC104' },
-  { username: 'MT00471', password: 'Aa@123456', role: 'staff',      location: 'MTC105' },
-  { username: 'MT00475', password: 'Aa@123456', role: 'staff',      location: 'MTC090' },
-  { username: 'MT00484', password: 'Aa@123456', role: 'staff',      location: 'MTC091' },
-  { username: 'MT00436', password: 'Aa@123456', role: 'staff',      location: 'MTC092' },
+  { username: 'Sahab',    password: 'Aa@123456', role: 'admin',      location: '' },
+  { username: 'BBB',      password: 'Aa@123456', role: 'admin',      location: '' },
+  { username: 'Khalaf',   password: 'Aa@123456', role: 'admin',      location: '' },
+  { username: 'Muhalhel', password: 'Aa@123456', role: 'admin',      location: '' },
+  { username: 'Ahmed',    password: 'Aa@123456', role: 'admin',      location: '' },
+  { username: 'Super',    password: 'Aa@123456', role: 'supervisor', location: 'MTC105' },
+  { username: 'مشرف',     password: 'Aa@123456', role: 'supervisor', location: '' },
+  { username: 'MT00455',  password: 'Aa@123456', role: 'staff',      location: 'MTC101' },
+  { username: 'MT00456',  password: 'Aa@123456', role: 'staff',      location: 'MTC102' },
+  { username: 'MT00457',  password: 'Aa@123456', role: 'staff',      location: 'MTC103' },
+  { username: 'MT00466',  password: 'Aa@123456', role: 'staff',      location: 'MTC106' },
+  { username: 'MT00470',  password: 'Aa@123456', role: 'staff',      location: 'MTC104' },
+  { username: 'MT00471',  password: 'Aa@123456', role: 'staff',      location: 'MTC105' },
+  { username: 'MT00475',  password: 'Aa@123456', role: 'staff',      location: 'MTC090' },
+  { username: 'MT00484',  password: 'Aa@123456', role: 'staff',      location: 'MTC091' },
+  { username: 'MT00436',  password: 'Aa@123456', role: 'staff',      location: 'MTC092' },
 ];
 
 function loadUsers() {
   try {
     const saved = localStorage.getItem('st_users');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge: always keep DEFAULT_USERS as base, add any extra saved users
+      const merged = [...DEFAULT_USERS];
+      for (const su of parsed) {
+        const existing = merged.findIndex(u => u.username === su.username);
+        if (existing >= 0) {
+          // Update password if changed (but protect Sahab)
+          if (su.username !== 'Sahab') merged[existing] = su;
+        } else {
+          merged.push(su);
+        }
+      }
+      return merged;
+    }
   } catch(e) {}
   localStorage.setItem('st_users', JSON.stringify(DEFAULT_USERS));
-  return DEFAULT_USERS;
+  return [...DEFAULT_USERS];
 }
 
 function saveUsers() {
@@ -1025,6 +1048,7 @@ function checkSession() {
 
 function showLogin() {
   document.getElementById('login-overlay').style.display = 'flex';
+  document.body.classList.add('login-open');
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('login-user').focus(), 100);
 }
@@ -1038,6 +1062,7 @@ function doLogin() {
     sessionStorage.setItem('st_user', JSON.stringify(found));
     document.getElementById('login-error').style.display = 'none';
     document.getElementById('login-overlay').style.display = 'none';
+    document.body.classList.remove('login-open');
     document.body.style.overflow = '';
     showDashboard();
   } else {
@@ -1129,6 +1154,10 @@ function renderUsersTable() {
       <td><strong>${u.username}</strong>${isProtected ? ' 🔒' : ''}</td>
       <td><span class="badge ${u.role==='admin'?'badge-green':u.role==='supervisor'?'badge-orange':'badge-red'}">${ROLE_LABELS[u.role]}</span></td>
       <td>${u.location || 'كل الفروع'}</td>
+      <td>
+        <span id="pw-${i}" style="font-family:monospace;font-size:12px;background:#f1f5f9;padding:3px 8px;border-radius:6px;letter-spacing:2px;">••••••••</span>
+        <button onclick="togglePw(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;margin-right:4px;" title="إظهار/إخفاء">👁️</button>
+      </td>
       <td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         ${isProtected ? '<span style="color:#9ca3af;font-size:11px;padding:4px 8px;background:#f3f4f6;border-radius:6px;">🔒 محمي</span>' : `
           <button class="btn-del" style="background:#ede9fe;color:#6d28d9;" onclick="editUsername(${i})">✏️ تعديل الاسم</button>
@@ -1194,6 +1223,18 @@ function editUsername(idx) {
   renderUsersTable();
   markUnsaved();
   alert(`✅ تم تغيير اسم المستخدم إلى "${newName.trim()}"`);
+}
+
+function togglePw(idx) {
+  const el = document.getElementById(`pw-${idx}`);
+  if (!el) return;
+  if (el.textContent === '••••••••') {
+    el.textContent = USERS[idx].password;
+    el.style.background = '#fef3c7';
+  } else {
+    el.textContent = '••••••••';
+    el.style.background = '#f1f5f9';
+  }
 }
 
 // ============ EMBEDDED DATA ============
