@@ -458,6 +458,53 @@
     .add-user-form { grid-template-columns: 1fr; }
   }
 
+  /* Last update badge */
+  .last-update-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.13);
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+    cursor: default;
+  }
+  .last-update-badge .dot {
+    width: 8px; height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; } 50% { opacity:0.4; }
+  }
+
+  /* Floating save button */
+  #float-save {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 50px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(16,185,129,0.45);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 500;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity:0; }
+    to   { transform: translateY(0);    opacity:1; }
+  }
+  #float-save:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16,185,129,0.5); }
+
   /* ===== LOGIN OVERLAY ===== */
   #login-overlay {
     position: fixed;
@@ -645,6 +692,10 @@
       </div>
     </div>
     <div class="header-date" id="header-date">Modern Trade · مايو 2026</div>
+    <div id="last-update-badge" class="last-update-badge" style="display:none;">
+      <div class="dot"></div>
+      <span id="last-update-text">-</span>
+    </div>
     <div class="user-badge" onclick="logout()" title="اضغط لتسجيل الخروج">
       <div>
         <div class="user-badge-name" id="hdr-username">-</div>
@@ -654,6 +705,9 @@
     </div>
   </div>
 </header>
+
+<!-- FLOATING SAVE BUTTON -->
+<button id="float-save" onclick="saveAll()">💾 حفظ التعديلات</button>
 
 <!-- TABS -->
 <div class="tabs">
@@ -847,6 +901,29 @@
 
   <!-- USERS TAB -->
   <div class="tab-panel" id="tab-users">
+
+    <!-- WhatsApp Settings Card -->
+    <div class="table-card" style="margin-bottom:20px;">
+      <div class="table-title"><span>📱</span> إعدادات واتساب</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;">
+        <div>
+          <div class="field-label" style="margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">رقم واتساب المدير (مع رمز الدولة)</div>
+          <input type="text" class="field-input" id="admin-whatsapp" placeholder="مثال: 966501234567" style="width:100%;direction:ltr;text-align:left;"
+            value="" oninput="saveWhatsappSettings()">
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">تنبيه عند تسجيل دخول أي موظف</div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:#f0f4fb;border-radius:10px;">
+            <input type="checkbox" id="notify-login" onchange="saveWhatsappSettings()" style="width:18px;height:18px;accent-color:#1a4db5;">
+            <span style="font-size:13px;color:#374151;">تفعيل التنبيه التلقائي</span>
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;font-size:12px;color:#166534;">
+        💡 عند إرسال بيانات الدخول لموظف، سيفتح واتساب برسالة جاهزة تحتوي الرابط واليوزر والباسورد — اضغط إرسال فقط.
+      </div>
+    </div>
+
     <div class="table-card">
       <div class="table-title"><span>👥</span> إدارة المستخدمين</div>
       <button class="btn-add-user" onclick="toggleAddForm()">➕ إضافة مستخدم جديد</button>
@@ -882,11 +959,15 @@
             <option value="MTC106">MTC106</option>
           </select>
         </div>
+        <div>
+          <label>رقم واتساب (اختياري)</label>
+          <input type="text" id="new-whatsapp" placeholder="966501234567" style="direction:ltr;text-align:left;">
+        </div>
         <button class="btn-confirm-add" onclick="addUser()">✅ إضافة</button>
       </div>
       <table class="users-table">
         <thead>
-          <tr><th>#</th><th>اسم المستخدم</th><th>الصلاحية</th><th>الفرع</th><th>حذف</th></tr>
+          <tr><th>#</th><th>اسم المستخدم</th><th>الصلاحية</th><th>الفرع</th><th>إجراءات</th></tr>
         </thead>
         <tbody id="tbody-users"></tbody>
       </table>
@@ -1021,8 +1102,10 @@ function showDashboard() {
     });
   }
 
+  loadSavedSettings();
   renderAll();
   renderUsersTable();
+  updateLastUpdateBadge();
   // تحميل البيانات المحفوظة من localStorage (محدّثة من الأدمن)
   const savedData = loadDataFromStorage();
   if (savedData) {
@@ -1038,20 +1121,23 @@ function renderUsersTable() {
   if (currentUser?.role !== 'admin') return;
   const tbody = document.getElementById('tbody-users');
   if (!tbody) return;
-  tbody.innerHTML = USERS.map((u, i) => `
-    <tr>
+  tbody.innerHTML = USERS.map((u, i) => {
+    const isProtected = u.username === 'Sahab';
+    const isMe = u.username === currentUser.username;
+    return `<tr>
       <td>${i + 1}</td>
-      <td><strong>${u.username}</strong></td>
+      <td><strong>${u.username}</strong>${isProtected ? ' 🔒' : ''}</td>
       <td><span class="badge ${u.role==='admin'?'badge-green':u.role==='supervisor'?'badge-orange':'badge-red'}">${ROLE_LABELS[u.role]}</span></td>
       <td>${u.location || 'كل الفروع'}</td>
-      <td style="display:flex;gap:6px;align-items:center;">
-        <button class="btn-del" style="background:#dbeafe;color:#1d4ed8;" onclick="editPassword(${i})">🔑 تغيير كلمة المرور</button>
-        ${u.username === currentUser.username 
-          ? '<span style="color:#9ca3af;font-size:11px">حسابك</span>' 
-          : `<button class="btn-del" onclick="deleteUser(${i})">🗑️ حذف</button>`}
+      <td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        ${isProtected ? '<span style="color:#9ca3af;font-size:11px;padding:4px 8px;background:#f3f4f6;border-radius:6px;">🔒 محمي</span>' : `
+          <button class="btn-del" style="background:#ede9fe;color:#6d28d9;" onclick="editUsername(${i})">✏️ تعديل الاسم</button>
+          <button class="btn-del" style="background:#dbeafe;color:#1d4ed8;" onclick="editPassword(${i})">🔑 كلمة المرور</button>
+          ${isMe ? '' : `<button class="btn-del" onclick="deleteUser(${i})">🗑️ حذف</button>`}
+        `}
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function toggleAddForm() {
@@ -1076,6 +1162,7 @@ function addUser() {
 }
 
 function deleteUser(idx) {
+  if (USERS[idx].username === 'Sahab') { alert('لا يمكن حذف حساب المدير الرئيسي'); return; }
   if (!confirm(`حذف المستخدم "${USERS[idx].username}"؟`)) return;
   USERS.splice(idx, 1);
   saveUsers();
@@ -1093,6 +1180,20 @@ function editPassword(idx) {
     sessionStorage.setItem('st_user', JSON.stringify(currentUser));
   }
   alert(`✅ تم تغيير كلمة المرور للمستخدم "${USERS[idx].username}"`);
+}
+
+function editUsername(idx) {
+  if (USERS[idx].username === 'Sahab') return;
+  const newName = prompt(`اسم مستخدم جديد (الحالي: "${USERS[idx].username}"):`, USERS[idx].username);
+  if (!newName || newName.trim() === '' || newName.trim() === USERS[idx].username) return;
+  if (USERS.find((u, i) => u.username === newName.trim() && i !== idx)) {
+    alert('هذا الاسم موجود مسبقاً'); return;
+  }
+  USERS[idx].username = newName.trim();
+  saveUsers();
+  renderUsersTable();
+  markUnsaved();
+  alert(`✅ تم تغيير اسم المستخدم إلى "${newName.trim()}"`);
 }
 
 // ============ EMBEDDED DATA ============
@@ -1483,7 +1584,8 @@ function saveSettings() {
   settings.commHigh = parseFloat(document.getElementById('s-comm-high').value) || 20;
   discountPct = parseFloat(document.getElementById('disc-input').value) || 0;
   renderAll();
-  alert('✅ تم حفظ الإعدادات وإعادة الحساب!');
+  markUnsaved();
+  alert('✅ تم حفظ الإعدادات! لا تنسى الضغط على زر الحفظ الأخضر.');
 }
 
 function loadExcel(event) {
@@ -1517,6 +1619,70 @@ function loadExcel(event) {
     }
   };
   reader.readAsArrayBuffer(file);
+}
+
+// ============ SAVE / UNSAVED INDICATOR ============
+let hasUnsaved = false;
+
+function markUnsaved() {
+  hasUnsaved = true;
+  const btn = document.getElementById('float-save');
+  if (btn) { btn.style.display = 'flex'; }
+}
+
+function saveAll() {
+  // Save settings to localStorage
+  localStorage.setItem('st_settings', JSON.stringify(settings));
+  localStorage.setItem('st_discount', discountPct.toString());
+  // Record update meta
+  const meta = {
+    by: currentUser?.username || 'admin',
+    at: new Date().toLocaleString('ar-SA', { dateStyle:'short', timeStyle:'short' })
+  };
+  localStorage.setItem('st_update_meta', JSON.stringify(meta));
+  updateLastUpdateBadge();
+  hasUnsaved = false;
+  const btn = document.getElementById('float-save');
+  if (btn) { btn.style.display = 'none'; }
+  // Show brief confirmation
+  btn.textContent = '✅ تم الحفظ!';
+  btn.style.display = 'flex';
+  setTimeout(() => { btn.style.display = 'none'; btn.innerHTML = '💾 حفظ التعديلات'; }, 1800);
+}
+
+function updateLastUpdateBadge() {
+  try {
+    const meta = JSON.parse(localStorage.getItem('st_update_meta') || 'null');
+    if (meta) {
+      document.getElementById('last-update-text').textContent = `آخر تحديث: ${meta.at} · ${meta.by}`;
+      document.getElementById('last-update-badge').style.display = 'flex';
+    }
+  } catch(e) {}
+}
+
+function loadSavedSettings() {
+  try {
+    const s = localStorage.getItem('st_settings');
+    if (s) {
+      const parsed = JSON.parse(s);
+      Object.assign(settings, parsed);
+      // Update inputs
+      const map = {
+        's-target-rev': settings.targetRev, 's-target-sims': settings.targetSims,
+        's-threshold': settings.threshold, 's-rent-yes': settings.rentYes,
+        's-rent-no': settings.rentNo, 's-support-max': settings.supportMax,
+        's-weight-rev': settings.weightRev, 's-weight-sims': settings.weightSims,
+        's-comm-low': settings.commLow, 's-comm-mid': settings.commMid,
+        's-comm-high': settings.commHigh
+      };
+      for (const [id, val] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+      }
+    }
+    const d = localStorage.getItem('st_discount');
+    if (d) { discountPct = parseFloat(d) || 0; const di = document.getElementById('disc-input'); if(di) di.value = discountPct; }
+  } catch(e) {}
 }
 
 // ============ DATA STORAGE SYSTEM ============
@@ -1601,6 +1767,7 @@ function loadExcel(event) {
           currentData = parsed;
           saveDataToStorage(parsed, file.name);
           updateStatusBar();
+          markUnsaved();
           renderAll();
         }
       }
