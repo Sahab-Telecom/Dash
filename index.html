@@ -1464,7 +1464,7 @@ function getLocStats() {
     map[r.Location].sims += r.Count || 1;
     const rev2 = (r.REV2 || 0) * (1 - discountPct / 100);
     map[r.Location].rev2 += rev2;
-    map[r.Location].commProd += rev2 * getCommRate(r.Addon_Value || 0);
+    map[r.Location].commProd += rev2 * getCommRate(rev2);  // rate based on REV2 per row
   }
   return Object.values(map).sort((a, b) => b.rev2 - a.rev2);
 }
@@ -1596,7 +1596,7 @@ function renderStaffTable() {
     map[r.STAFF_NO].sims += r.Count || 1;
     const rev2 = (r.REV2 || 0) * (1 - discountPct / 100);
     map[r.STAFF_NO].rev2 += rev2;
-    map[r.STAFF_NO].commProd += rev2 * getCommRate(r.Addon_Value || 0);
+    map[r.STAFF_NO].commProd += rev2 * getCommRate(rev2);  // rate based on REV2 per row
   }
   const arr = Object.values(map).sort((a, b) => b.rev2 - a.rev2);
 
