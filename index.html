@@ -1106,7 +1106,7 @@ const ROLE_LABELS = { admin: 'مدير', supervisor: 'مشرف فرع', staff: '
 const ROLE_CLASSES = { admin: 'role-admin', supervisor: 'role-supervisor', staff: 'role-staff' };
 
 function checkSession() {
-  const saved = sessionStorage.getItem('st_user');
+  const saved = localStorage.getItem('st_user');
   if (saved) {
     try {
       currentUser = JSON.parse(saved);
@@ -1132,7 +1132,7 @@ function doLogin() {
   const found = USERS.find(x => x.username === u && x.password === p);
   if (found) {
     currentUser = found;
-    sessionStorage.setItem('st_user', JSON.stringify(found));
+    localStorage.setItem('st_user', JSON.stringify(found));
     document.getElementById('login-error').style.display = 'none';
     document.getElementById('login-overlay').style.display = 'none';
     document.body.classList.remove('login-open');
@@ -1156,7 +1156,7 @@ function doLogin() {
 
 function logout() {
   if (!confirm('هل تريد تسجيل الخروج؟')) return;
-  sessionStorage.removeItem('st_user');
+  localStorage.removeItem('st_user');
   currentUser = null;
   location.reload();
 }
@@ -1382,7 +1382,7 @@ function editPassword(idx) {
   // Update session if editing own password
   if (USERS[idx].username === currentUser?.username) {
     currentUser.password = newPass.trim();
-    sessionStorage.setItem('st_user', JSON.stringify(currentUser));
+    localStorage.setItem('st_user', JSON.stringify(currentUser));
   }
   alert(`✅ تم تغيير كلمة المرور للمستخدم "${USERS[idx].username}"`);
 }
@@ -1572,7 +1572,7 @@ function renderLocationsTable(locStats) {
 function renderStaffTable() {
   const isAdmin = (currentUser?.pages || []).includes('commissions');
   const map = {};
-  for (const r of currentData) {
+  for (const r of getActiveData()) {
     if (!r.STAFF_NO) continue;
     if (!map[r.STAFF_NO]) map[r.STAFF_NO] = { staff: r.STAFF_NO, loc: r.Location, sims: 0, rev2: 0, commProd: 0 };
     map[r.STAFF_NO].sims += r.Count || 1;
@@ -1611,7 +1611,7 @@ function renderStaffTable() {
   }).join('');
 }
 
-function renderCommissionsTable(locStats) {
+function renderCommissionsTable(locStats) {  // locStats already uses getActiveData via getLocStats
   const comms = calcCommissions(locStats);
   const tbody = document.getElementById('tbody-commissions');
   const origRev = getLocStats(); // before discount
@@ -1770,8 +1770,9 @@ function renderCharts(locStats) {
 }
 
 function renderAll() {
+  updateDataDateBadge(currentData);
   const locStats = getLocStats();
-  renderKPIs(currentData);
+  renderKPIs(getActiveData());
   renderLocationsTable(locStats);
   renderStaffTable();
   renderCommissionsTable(locStats);
@@ -2047,7 +2048,8 @@ function loadRemembered() {
 let filteredData = null;
 
 function updateDataDateBadge(data) {
-  const days = [...new Set(data.filter(d=>d.Day).map(d=>d.Day))].sort((a,b)=>a-b);
+  if (!data || !data.length) return;
+  const days = [...new Set(data.filter(d=>d.Day).map(d=>parseInt(d.Day)||0).filter(d=>d>0))].sort((a,b)=>a-b);
   if (!days.length) return;
   const el = document.getElementById('data-date-text');
   const badge = document.getElementById('data-date-badge');
@@ -2059,16 +2061,20 @@ function applyDateFilter() {
   const fv = document.getElementById('filter-from')?.value;
   const tv = document.getElementById('filter-to')?.value;
   const from = fv ? parseInt(fv.split('-')[2]) : 0;
-  const to = tv ? parseInt(tv.split('-')[2]) : 0;
+  const to   = tv ? parseInt(tv.split('-')[2]) : 0;
   if (!from && !to) { clearDateFilter(); return; }
-  filteredData = currentData.filter(d => {
-    const day = d.Day || 0;
-    if (from && to) return day >= from && day <= to;
-    if (from) return day >= from;
-    return day <= to;
+  // Filter from the full dataset (currentData)
+  filteredData = currentData.filter(function(d) {
+    var day = parseInt(d.Day) || 0;
+    if (!day) return false;
+    if (from && to)  return day >= from && day <= to;
+    if (from)        return day >= from;
+    if (to)          return day <= to;
+    return true;
   });
   const label = document.getElementById('date-range-label');
   if (label) label.textContent = '📆 ' + filteredData.length + ' سجل · يوم ' + (from||'?') + ' → ' + (to||'?');
+  console.log('[DateFilter] from:', from, 'to:', to, 'results:', filteredData.length);
   renderAll();
 }
 
