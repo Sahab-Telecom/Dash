@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Noto+Sans+Arabic:wght@400;700&display=swap');
 
   :root {
     --blue-deep: #0d2666;
@@ -188,7 +188,7 @@
   .kpi-card.red { border-right-color: var(--red); }
   .kpi-label { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 6px; }
   .kpi-value { font-size: 28px; font-weight: 900; color: var(--blue-deep); }
-  .kpi-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+  .kpi-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; } .kpi-sub .sar, .kpi-sub span { font-size: 1.3em !important; font-weight: 900 !important; }
   .kpi-icon { position: absolute; top: 18px; left: 20px; font-size: 24px; opacity: 0.15; }
 
   /* CHARTS GRID */
@@ -661,6 +661,15 @@
     padding: 10px 18px; border-radius: 10px; font-family: 'Cairo', sans-serif;
     font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
   }
+
+  /* SAR new symbol */
+  .sar { 
+    font-family: 'Noto Kufi Arabic', 'Noto Sans Arabic', Arial, sans-serif;
+    font-size: 1.15em;
+    font-weight: 900;
+    line-height: 1;
+  }
+
 </style>
 </head>
 <body>
@@ -679,9 +688,13 @@
       <label>كلمة المرور</label>
       <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
     </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280;margin-bottom:4px;cursor:pointer;justify-content:flex-end;">
+      <input type="checkbox" id="remember-me" style="width:15px;height:15px;accent-color:#1a4db5;">
+      تذكرني
+    </label>
     <button class="login-btn" onclick="doLogin()">🔐 تسجيل الدخول</button>
     <div class="login-error" id="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
-    <div class="login-version">Modern Trade Dashboard v2.0</div>
+    <div class="login-version" id="login-ver-text">Modern Trade Dashboard v2.0</div>
   </div>
 </div>
 
@@ -696,6 +709,9 @@
       </div>
     </div>
     <div class="header-date" id="header-date">Modern Trade · مايو 2026</div>
+    <div id="data-date-badge" style="background:rgba(255,255,255,0.13);padding:6px 14px;border-radius:20px;color:white;font-size:11px;display:none;align-items:center;gap:6px;">
+      📊 آخر بيانات: <span id="data-date-text">-</span>
+    </div>
     <div id="last-update-badge" class="last-update-badge" style="display:none;">
       <div class="dot"></div>
       <span id="last-update-text">-</span>
@@ -722,6 +738,7 @@
     <button class="tab-btn" onclick="switchTab('commissions')">💰 العمولات</button>
     <button class="tab-btn" id="tab-btn-settings" onclick="switchTab('settings')">⚙️ الإعدادات</button>
     <button class="tab-btn" id="tab-btn-users" onclick="switchTab('users')" style="display:none">👥 المستخدمون</button>
+    <button class="tab-btn" id="tab-btn-cash" onclick="switchTab('cash')" style="display:none">💵 الكاش</button>
   </div>
 </div>
 
@@ -741,6 +758,21 @@
         <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display:none" onchange="loadExcel(event)">
       </label>
     </div>
+  </div>
+
+  <!-- DATE FILTER BAR -->
+  <div id="date-filter-bar" style="background:white;border-radius:14px;padding:14px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(13,38,102,0.1);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <span style="font-size:13px;font-weight:700;color:#0d2666;">📅 فلتر التاريخ</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <label style="font-size:12px;color:#6b7280;font-weight:600;">من:</label>
+      <input type="date" id="filter-from" class="field-input" style="width:145px;padding:7px 10px;" onchange="applyDateFilter()">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <label style="font-size:12px;color:#6b7280;font-weight:600;">إلى:</label>
+      <input type="date" id="filter-to" class="field-input" style="width:145px;padding:7px 10px;" onchange="applyDateFilter()">
+    </div>
+    <button onclick="clearDateFilter()" style="background:#f1f5f9;color:#374151;border:none;padding:7px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">✕ إزالة الفلتر</button>
+    <div id="date-range-label" style="font-size:12px;color:#6b7280;margin-right:auto;"></div>
   </div>
 
   <!-- OVERVIEW TAB -->
@@ -777,7 +809,7 @@
             <th>الفرع</th>
             <th>الموظف</th>
             <th>عدد SIMs</th>
-            <th>إجمالي REV2 (ريال)</th>
+            <th>إجمالي REV2</th>
             <th>نسبة التحقيق</th>
             <th>التقدم</th>
             <th>إيجار الفرع</th>
@@ -798,7 +830,7 @@
             <th>رقم الموظف</th>
             <th>الفرع</th>
             <th>عدد SIMs</th>
-            <th>REV2 (ريال)</th>
+            <th>REV2</th>
             <th>نسبة التحقيق</th>
             <th>عمولة المنتج</th>
           </tr>
@@ -904,76 +936,93 @@
   </div>
 
   <!-- USERS TAB -->
-  <div class="tab-panel" id="tab-users">
-
-    <!-- WhatsApp Settings Card -->
-    <div class="table-card" style="margin-bottom:20px;">
-      <div class="table-title"><span>📱</span> إعدادات واتساب</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;">
-        <div>
-          <div class="field-label" style="margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">رقم واتساب المدير (مع رمز الدولة)</div>
-          <input type="text" class="field-input" id="admin-whatsapp" placeholder="مثال: 966501234567" style="width:100%;direction:ltr;text-align:left;"
-            value="" oninput="saveWhatsappSettings()">
-        </div>
-        <div>
-          <div class="field-label" style="margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">تنبيه عند تسجيل دخول أي موظف</div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:#f0f4fb;border-radius:10px;">
-            <input type="checkbox" id="notify-login" onchange="saveWhatsappSettings()" style="width:18px;height:18px;accent-color:#1a4db5;">
-            <span style="font-size:13px;color:#374151;">تفعيل التنبيه التلقائي</span>
-          </label>
-        </div>
+  <!-- PERMISSIONS MODAL -->
+  <div id="perm-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:20px;padding:28px;width:92%;max-width:540px;max-height:88vh;overflow-y:auto;direction:rtl;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h3 style="margin:0;font-size:17px;color:#0d2666;" id="perm-modal-title">تعديل الصلاحيات</h3>
+        <button onclick="closePermModal()" style="background:#f1f5f9;border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;color:#374151;">✕</button>
       </div>
-      <div style="margin-top:16px;padding:12px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;font-size:12px;color:#166534;">
-        💡 عند إرسال بيانات الدخول لموظف، سيفتح واتساب برسالة جاهزة تحتوي الرابط واليوزر والباسورد — اضغط إرسال فقط.
+      <div id="perm-modal-info" style="background:#f0f4fb;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#374151;"></div>
+      <div style="margin-bottom:18px;">
+        <div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">📄 الصفحات المتاحة</div>
+        <div id="perm-pages-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
       </div>
+      <div style="margin-bottom:22px;">
+        <div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">⚡ الإجراءات المتاحة</div>
+        <div id="perm-actions-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      </div>
+      <button onclick="savePermModal()" style="width:100%;background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:14px;border-radius:12px;font-family:Cairo,sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">💾 حفظ الصلاحيات</button>
     </div>
+  </div>
 
+  <div class="tab-panel" id="tab-users">
     <div class="table-card">
-      <div class="table-title"><span>👥</span> إدارة المستخدمين</div>
-      <button class="btn-add-user" onclick="toggleAddForm()">➕ إضافة مستخدم جديد</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="table-title" style="margin:0;"><span>👥</span> إدارة المستخدمين</div>
+        <button class="btn-add-user" onclick="toggleAddForm()" style="margin:0;">➕ إضافة مستخدم جديد</button>
+      </div>
       <div class="add-user-form" id="add-user-form">
-        <div>
-          <label>اسم المستخدم</label>
-          <input type="text" id="new-username" placeholder="username">
-        </div>
-        <div>
-          <label>كلمة المرور</label>
-          <input type="password" id="new-password" placeholder="••••••••">
-        </div>
+        <div><label>اسم المستخدم</label><input type="text" id="new-username" placeholder="username"></div>
+        <div><label>كلمة المرور</label><input type="password" id="new-password" placeholder="••••••••"></div>
         <div>
           <label>الصلاحية</label>
           <select id="new-role">
-            <option value="admin">مدير - كامل الصلاحيات</option>
-            <option value="supervisor">مشرف فرع</option>
+            <option value="admin">مدير</option>
+            <option value="supervisor">مشرف</option>
             <option value="staff">موظف</option>
           </select>
         </div>
         <div>
-          <label>الفرع (للمشرف/الموظف)</label>
+          <label>الفرع</label>
           <select id="new-location">
             <option value="">كل الفروع</option>
-            <option value="MTC090">MTC090</option>
-            <option value="MTC091">MTC091</option>
-            <option value="MTC092">MTC092</option>
-            <option value="MTC101">MTC101</option>
-            <option value="MTC102">MTC102</option>
-            <option value="MTC103">MTC103</option>
-            <option value="MTC104">MTC104</option>
-            <option value="MTC105">MTC105</option>
+            <option value="MTC090">MTC090</option><option value="MTC091">MTC091</option>
+            <option value="MTC092">MTC092</option><option value="MTC101">MTC101</option>
+            <option value="MTC102">MTC102</option><option value="MTC103">MTC103</option>
+            <option value="MTC104">MTC104</option><option value="MTC105">MTC105</option>
             <option value="MTC106">MTC106</option>
           </select>
         </div>
-        <div>
-          <label>رقم واتساب (اختياري)</label>
-          <input type="text" id="new-whatsapp" placeholder="966501234567" style="direction:ltr;text-align:left;">
-        </div>
         <button class="btn-confirm-add" onclick="addUser()">✅ إضافة</button>
       </div>
-      <table class="users-table">
+      <div style="overflow-x:auto;">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>#</th><th>المستخدم</th><th>الدور</th><th>الفرع</th>
+              <th>كلمة المرور</th><th>الصفحات</th><th>تعديل</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-users"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CASH TAB -->
+  <div class="tab-panel" id="tab-cash">
+    <div class="table-card" style="margin-bottom:20px;">
+      <div class="table-title"><span>⚙️</span> إعدادات الكاش المحصل</div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">حدد مقابل كل باقة (Addon Value) كم ريال كاش مستهدف.</p>
+      <div id="cash-rules-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;"></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;font-weight:600;color:#374151;">نسبة الخصم على الكاش</span>
+          <input type="number" id="cash-discount-pct" class="field-input" min="0" max="100" value="0" style="width:80px;" oninput="updateCashPreview()">
+          <span style="font-size:12px;color:#6b7280;">%</span>
+        </div>
+        <button class="btn-save" style="width:auto;padding:10px 22px;" onclick="saveCashSettings()">💾 حفظ إعدادات الكاش</button>
+      </div>
+    </div>
+    <div class="kpi-grid" id="cash-kpi-grid" style="margin-bottom:20px;"></div>
+    <div class="table-card">
+      <div class="table-title"><span>💵</span> الكاش المحصل بالفروع</div>
+      <table>
         <thead>
-          <tr><th>#</th><th>اسم المستخدم</th><th>الصلاحية</th><th>الفرع</th><th>كلمة المرور</th><th>إجراءات</th></tr>
+          <tr><th>الفرع</th><th>الموظف</th><th>عدد الوحدات</th><th>الكاش قبل الخصم</th><th>الكاش بعد الخصم</th></tr>
         </thead>
-        <tbody id="tbody-users"></tbody>
+        <tbody id="tbody-cash"></tbody>
       </table>
     </div>
   </div>
@@ -982,14 +1031,32 @@
 
 <script>
 // ============ AUTH SYSTEM WITH LOCALSTORAGE ============
+// ============ PERMISSIONS SYSTEM ============
+// pages: which tabs are visible
+// actions: what the user can DO inside those tabs
+const ALL_PAGES   = ['overview','locations','staff','commissions','cash','settings','users'];
+const ALL_ACTIONS = ['upload_excel','edit_settings','apply_discount','edit_cash','manage_users'];
+
+// Default permission templates (used when creating new users)
+const PERM_FULL    = { pages: ALL_PAGES,                                      actions: ALL_ACTIONS };
+const PERM_VIEW    = { pages: ['overview','locations','staff','commissions','cash'], actions: [] };
+const PERM_SALES   = { pages: ['overview','locations','staff'],               actions: [] };
+const PERM_MINIMAL = { pages: ['overview','staff'],                           actions: [] };
+
+function defaultPerms(role) {
+  if (role === 'admin') return { pages: [...ALL_PAGES], actions: [...ALL_ACTIONS] };
+  if (role === 'supervisor') return { pages: ['overview','locations','staff'], actions: [] };
+  return { pages: ['overview','staff'], actions: [] };
+}
+
 const DEFAULT_USERS = [
-  { username: 'Sahab',    password: 'Aa@123456', role: 'admin',      location: '' },
-  { username: 'BBB',      password: 'Aa@123456', role: 'admin',      location: '' },
-  { username: 'Khalaf',   password: 'Aa@123456', role: 'admin',      location: '' },
-  { username: 'Muhalhel', password: 'Aa@123456', role: 'admin',      location: '' },
-  { username: 'Ahmed',    password: 'Aa@123456', role: 'admin',      location: '' },
-  { username: 'Super',    password: 'Aa@123456', role: 'supervisor', location: 'MTC105' },
-  { username: 'مشرف',     password: 'Aa@123456', role: 'supervisor', location: '' },
+  { username: 'Sahab',    password: 'Aa@123456', role: 'admin',      location: '', ...PERM_FULL },
+  { username: 'BBB',      password: 'Aa@123456', role: 'admin',      location: '', ...PERM_FULL },
+  { username: 'Khalaf',   password: 'Aa@123456', role: 'admin',      location: '', ...PERM_FULL },
+  { username: 'Muhalhel', password: 'Aa@123456', role: 'admin',      location: '', ...PERM_FULL },
+  { username: 'Ahmed',    password: 'Aa@123456', role: 'admin',      location: '', ...PERM_FULL },
+  { username: 'Super',    password: 'Aa@123456', role: 'supervisor', location: 'MTC105', pages: ['overview','locations','staff'], actions: [] },
+  { username: 'مشرف',     password: 'Aa@123456', role: 'supervisor', location: '', pages: ['overview','locations','staff'], actions: [] },
   { username: 'MT00455',  password: 'Aa@123456', role: 'staff',      location: 'MTC101' },
   { username: 'MT00456',  password: 'Aa@123456', role: 'staff',      location: 'MTC102' },
   { username: 'MT00457',  password: 'Aa@123456', role: 'staff',      location: 'MTC103' },
@@ -1011,9 +1078,13 @@ function loadUsers() {
       for (const su of parsed) {
         const existing = merged.findIndex(u => u.username === su.username);
         if (existing >= 0) {
-          // Update password if changed (but protect Sahab)
-          if (su.username !== 'Sahab') merged[existing] = su;
+          if (su.username !== 'Sahab') {
+            merged[existing] = { ...merged[existing], ...su };
+            if (!merged[existing].pages)   merged[existing].pages   = defaultPerms(merged[existing].role).pages;
+            if (!merged[existing].actions) merged[existing].actions = defaultPerms(merged[existing].role).actions;
+          }
         } else {
+          if (!su.pages) su.pages = su.role === 'admin' ? ADMIN_PAGES : SUPER_PAGES;
           merged.push(su);
         }
       }
@@ -1050,7 +1121,9 @@ function showLogin() {
   document.getElementById('login-overlay').style.display = 'flex';
   document.body.classList.add('login-open');
   document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('login-user').focus(), 100);
+  loadRemembered();
+  setTimeout(() => { const vEl=document.getElementById('login-ver-text'); if(vEl) vEl.textContent='Modern Trade Dashboard · '+getVersionStr(); }, 100);
+  setTimeout(() => document.getElementById('login-user').focus(), 150);
 }
 
 function doLogin() {
@@ -1064,6 +1137,13 @@ function doLogin() {
     document.getElementById('login-overlay').style.display = 'none';
     document.body.classList.remove('login-open');
     document.body.style.overflow = '';
+    if (document.getElementById('remember-me')?.checked) {
+      localStorage.setItem('st_rmb_u', u);
+      localStorage.setItem('st_rmb_p', p);
+    } else {
+      localStorage.removeItem('st_rmb_u');
+      localStorage.removeItem('st_rmb_p');
+    }
     showDashboard();
   } else {
     const err = document.getElementById('login-error');
@@ -1090,47 +1170,48 @@ function showDashboard() {
 
   const role = currentUser.role;
 
-  if (role === 'admin') {
-    // Admin: كل شيء
-    currentData = RAW_DATA.filter(d => d.STAFF_NO && d.Location);
-    document.getElementById('tab-btn-settings').style.display = '';
-    document.getElementById('tab-btn-users').style.display = '';
-
-    document.querySelector('.upload-banner').style.display = '';
-    // إظهار تبويب العمولات
-    document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
-    document.getElementById('tab-btn-users').style.display = '';
-
-  } else if (role === 'supervisor') {
-    // Supervisor: كل الفروع، بدون عمولات، بدون إعدادات
-    currentData = RAW_DATA.filter(d => d.STAFF_NO && d.Location);
-    document.getElementById('tab-btn-settings').style.display = 'none';
-    document.getElementById('tab-btn-users').style.display = 'none';
-
-    document.querySelector('.upload-banner').style.display = 'none';
-    // إخفاء تبويب العمولات
-    document.querySelectorAll('.tab-btn').forEach(b => {
-      if (b.textContent.includes('العمولات')) b.style.display = 'none';
-    });
-
+  // ── Data filter by location ──
+  if (role === 'staff' && currentUser.location) {
+    currentData = RAW_DATA.filter(d => d.Location === currentUser.location);
   } else {
-    // Staff: فرعه فقط، بدون عمولات، بدون إعدادات
-    const loc = currentUser.location;
-    currentData = loc ? RAW_DATA.filter(d => d.Location === loc) : RAW_DATA.filter(d => d.STAFF_NO && d.Location);
-    document.getElementById('tab-btn-settings').style.display = 'none';
-    document.getElementById('tab-btn-users').style.display = 'none';
-
-    document.querySelector('.upload-banner').style.display = 'none';
-    // إخفاء تبويب العمولات
-    document.querySelectorAll('.tab-btn').forEach(b => {
-      if (b.textContent.includes('العمولات')) b.style.display = 'none';
-    });
+    currentData = RAW_DATA.filter(d => d.STAFF_NO && d.Location);
   }
 
+  // ── Per-user permissions (pages + actions) ──
+  const uPages   = currentUser.pages   || defaultPerms(role).pages;
+  const uActions = currentUser.actions || defaultPerms(role).actions;
+
+  // Store globally for runtime action guards
+  window._canUpload       = uActions.includes('upload_excel');
+  window._canEditSettings = uActions.includes('edit_settings');
+  window._canDiscount     = uActions.includes('apply_discount');
+  window._canEditCash     = uActions.includes('edit_cash');
+  window._canManageUsers  = uActions.includes('manage_users');
+  console.log('[Perms] User:', currentUser.username, '| Pages:', uPages, '| Actions:', uActions);
+
+  // Tab icon → page key mapping
+  const TAB_MAP = {
+    'نظرة عامة':'overview', 'الفروع':'locations', 'الموظف':'staff',
+    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users'
+  };
+
+  // Show/hide each tab based on this user's pages list
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const txt = b.textContent;
+    const key = Object.keys(TAB_MAP).find(k => txt.includes(k));
+    if (key) b.style.display = uPages.includes(TAB_MAP[key]) ? '' : 'none';
+  });
+
+  // Upload banner
+  document.querySelector('.upload-banner').style.display = window._canUpload ? '' : 'none';
+
   loadSavedSettings();
+  loadCashSettings();
   renderAll();
   renderUsersTable();
   updateLastUpdateBadge();
+  const cashBtn = document.getElementById('tab-btn-cash');
+  if (cashBtn) cashBtn.style.display = (currentUser?.role === 'admin' || currentUser?.role === 'supervisor') ? '' : 'none';
   // تحميل البيانات المحفوظة من localStorage (محدّثة من الأدمن)
   const savedData = loadDataFromStorage();
   if (savedData) {
@@ -1142,32 +1223,125 @@ function showDashboard() {
   updateStatusBar();
 }
 
+const PAGE_NAMES   = { overview:'📊 نظرة عامة', locations:'📍 الفروع', staff:'👤 الموظفون', commissions:'💰 العمولات', cash:'💵 الكاش', settings:'⚙️ الإعدادات', users:'👥 المستخدمون' };
+const ACTION_NAMES = { upload_excel:'⬆️ رفع إكسيل', edit_settings:'⚙️ تعديل الإعدادات', apply_discount:'✂️ الخصم', edit_cash:'💵 تعديل الكاش', manage_users:'👥 إدارة المستخدمين' };
+
 function renderUsersTable() {
-  if (currentUser?.role !== 'admin') return;
+  if (!(currentUser?.pages || []).includes('users')) return;
+  const canEdit = window._canManageUsers !== false;
   const tbody = document.getElementById('tbody-users');
   if (!tbody) return;
+
   tbody.innerHTML = USERS.map((u, i) => {
     const isProtected = u.username === 'Sahab';
     const isMe = u.username === currentUser.username;
-    return `<tr>
-      <td>${i + 1}</td>
-      <td><strong>${u.username}</strong>${isProtected ? ' 🔒' : ''}</td>
-      <td><span class="badge ${u.role==='admin'?'badge-green':u.role==='supervisor'?'badge-orange':'badge-red'}">${ROLE_LABELS[u.role]}</span></td>
-      <td>${u.location || 'كل الفروع'}</td>
-      <td>
-        <span id="pw-${i}" style="font-family:monospace;font-size:12px;background:#f1f5f9;padding:3px 8px;border-radius:6px;letter-spacing:2px;">••••••••</span>
-        <button onclick="togglePw(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;margin-right:4px;" title="إظهار/إخفاء">👁️</button>
-      </td>
-      <td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-        ${isProtected ? '<span style="color:#9ca3af;font-size:11px;padding:4px 8px;background:#f3f4f6;border-radius:6px;">🔒 محمي</span>' : `
-          <button class="btn-del" style="background:#ede9fe;color:#6d28d9;" onclick="editUsername(${i})">✏️ تعديل الاسم</button>
-          <button class="btn-del" style="background:#dbeafe;color:#1d4ed8;" onclick="editPassword(${i})">🔑 كلمة المرور</button>
-          ${isMe ? '' : `<button class="btn-del" onclick="deleteUser(${i})">🗑️ حذف</button>`}
-        `}
-      </td>
-    </tr>`;
+    const uPages   = u.pages   || defaultPerms(u.role).pages;
+    const uActions = u.actions || defaultPerms(u.role).actions;
+
+    // Pages summary
+    const pagesSummary = ALL_PAGES.filter(p => uPages.includes(p))
+      .map(p => '<span style="background:#dbeafe;color:#1e40af;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap;">' + PAGE_NAMES[p].replace(/[^؀-ۿ\s\w]/g,'').trim() + '</span>')
+      .join(' ');
+
+    const editBtn = isProtected
+      ? '<span style="font-size:11px;color:#9ca3af;">🔒</span>'
+      : canEdit
+        ? '<button onclick="openPermModal(' + i + ')" style="background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:7px 14px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">✏️ تعديل</button>'
+        : '';
+
+    return '<tr>'
+      + '<td>' + (i+1) + '</td>'
+      + '<td><strong>' + u.username + '</strong>' + (isProtected ? ' 🔒' : '') + '</td>'
+      + '<td><span class="badge ' + (u.role==='admin'?'badge-green':u.role==='supervisor'?'badge-orange':'badge-red') + '">' + (ROLE_LABELS[u.role]||u.role) + '</span></td>'
+      + '<td style="font-size:12px;">' + (u.location||'كل الفروع') + '</td>'
+      + '<td><span id="pw-' + i + '" style="font-family:monospace;font-size:11px;background:#f1f5f9;padding:2px 8px;border-radius:6px;letter-spacing:2px;">••••••</span> <button onclick="togglePw(' + i + ')" style="background:none;border:none;cursor:pointer;font-size:13px;">👁️</button></td>'
+      + '<td style="max-width:200px;"><div style="display:flex;flex-wrap:wrap;gap:3px;">' + (pagesSummary||'<span style="color:#9ca3af;font-size:11px;">لا صفحات</span>') + '</div></td>'
+      + '<td>' + editBtn + ((!isProtected && canEdit && !isMe) ? ' <button onclick="deleteUser(' + i + ')" style="background:#fee2e2;color:#b91c1c;border:none;padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;margin-top:4px;">🗑️</button>' : '') + '</td>'
+      + '</tr>';
   }).join('');
 }
+
+// ── PERMISSIONS MODAL ──
+let _permIdx = -1;
+let _permPages = [];
+let _permActions = [];
+
+function openPermModal(idx) {
+  if (window._canManageUsers === false) { alert('❌ ليس لديك صلاحية تعديل الصلاحيات'); return; }
+  _permIdx = idx;
+  const u = USERS[idx];
+  _permPages   = [...(u.pages   || defaultPerms(u.role).pages)];
+  _permActions = [...(u.actions || defaultPerms(u.role).actions)];
+
+  document.getElementById('perm-modal-title').textContent = 'صلاحيات: ' + u.username;
+  document.getElementById('perm-modal-info').innerHTML =
+    '<strong>' + u.username + '</strong> &nbsp;·&nbsp; ' +
+    (ROLE_LABELS[u.role]||u.role) + ' &nbsp;·&nbsp; ' +
+    (u.location||'كل الفروع') +
+    '<br><span style="font-size:11px;color:#6b7280;margin-top:4px;display:block;">اضغط على أي عنصر لتفعيله أو إلغائه</span>';
+
+  renderPermModal();
+  const modal = document.getElementById('perm-modal');
+  modal.style.display = 'flex';
+}
+
+function renderPermModal() {
+  var pg = document.getElementById('perm-pages-grid');
+  var html_p = '';
+  for (var pi = 0; pi < ALL_PAGES.length; pi++) {
+    var p = ALL_PAGES[pi];
+    var has = _permPages.indexOf(p) >= 0;
+    html_p += '<div onclick="toggleModalIdx(\'page\',' + pi + ')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;cursor:pointer;box-sizing:border-box;border:2px solid ' + (has ? '#1a4db5' : '#e5e7eb') + ';background:' + (has ? '#eff6ff' : '#fafafa') + ';">'
+      + '<div style="width:20px;height:20px;border-radius:6px;flex-shrink:0;background:' + (has ? '#1a4db5' : '#e5e7eb') + ';display:flex;align-items:center;justify-content:center;">'
+      + (has ? '<span style="color:white;font-size:11px;font-weight:900;">&#10003;</span>' : '')
+      + '</div>'
+      + '<span style="font-size:13px;font-weight:' + (has ? '700' : '400') + ';color:' + (has ? '#0d2666' : '#6b7280') + ';">' + PAGE_NAMES[p] + '</span>'
+      + '</div>';
+  }
+  pg.innerHTML = html_p;
+
+  var ag = document.getElementById('perm-actions-grid');
+  var html_a = '';
+  for (var ai = 0; ai < ALL_ACTIONS.length; ai++) {
+    var a = ALL_ACTIONS[ai];
+    var hasA = _permActions.indexOf(a) >= 0;
+    html_a += '<div onclick="toggleModalIdx(\'action\',' + ai + ')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;cursor:pointer;box-sizing:border-box;border:2px solid ' + (hasA ? '#059669' : '#e5e7eb') + ';background:' + (hasA ? '#f0fdf4' : '#fafafa') + ';">'
+      + '<div style="width:20px;height:20px;border-radius:6px;flex-shrink:0;background:' + (hasA ? '#059669' : '#e5e7eb') + ';display:flex;align-items:center;justify-content:center;">'
+      + (hasA ? '<span style="color:white;font-size:11px;font-weight:900;">&#10003;</span>' : '')
+      + '</div>'
+      + '<span style="font-size:13px;font-weight:' + (hasA ? '700' : '400') + ';color:' + (hasA ? '#065f46' : '#6b7280') + ';">' + ACTION_NAMES[a] + '</span>'
+      + '</div>';
+  }
+  ag.innerHTML = html_a;
+}
+
+function toggleModalIdx(type, listIdx) {
+  const key = type === 'page' ? ALL_PAGES[listIdx] : ALL_ACTIONS[listIdx];
+  const arr = type === 'page' ? _permPages : _permActions;
+  const i = arr.indexOf(key);
+  if (i >= 0) arr.splice(i, 1); else arr.push(key);
+  renderPermModal();
+}
+
+function savePermModal() {
+  if (_permIdx < 0) return;
+  USERS[_permIdx].pages   = [..._permPages];
+  USERS[_permIdx].actions = [..._permActions];
+  saveUsers();
+  renderUsersTable();
+  markUnsaved();
+  closePermModal();
+  // Show confirmation
+  const btn = document.getElementById('float-save');
+  if (btn) { btn.textContent = '✅ تم حفظ الصلاحيات!'; btn.style.display = 'flex'; setTimeout(() => { btn.style.display='none'; btn.innerHTML='💾 حفظ التعديلات'; }, 2000); }
+}
+
+function closePermModal() {
+  document.getElementById('perm-modal').style.display = 'none';
+  _permIdx = -1;
+}
+
+
 
 function toggleAddForm() {
   const f = document.getElementById('add-user-form');
@@ -1175,6 +1349,7 @@ function toggleAddForm() {
 }
 
 function addUser() {
+  if (!window._canManageUsers) { alert('❌ ليس لديك صلاحية إدارة المستخدمين'); return; }
   const u = document.getElementById('new-username').value.trim();
   const p = document.getElementById('new-password').value;
   const r = document.getElementById('new-role').value;
@@ -1191,6 +1366,7 @@ function addUser() {
 }
 
 function deleteUser(idx) {
+  if (!window._canManageUsers) { alert('❌ ليس لديك صلاحية إدارة المستخدمين'); return; }
   if (USERS[idx].username === 'Sahab') { alert('لا يمكن حذف حساب المدير الرئيسي'); return; }
   if (!confirm(`حذف المستخدم "${USERS[idx].username}"؟`)) return;
   USERS.splice(idx, 1);
@@ -1264,7 +1440,7 @@ function getCommRate(addonVal) {
 
 function getLocStats() {
   const map = {};
-  for (const r of currentData) {
+  for (const r of getActiveData()) {
     if (!r.Location) continue;
     if (!map[r.Location]) map[r.Location] = { loc: r.Location, staff: r.STAFF_NO, sims: 0, rev2: 0, commProd: 0 };
     map[r.Location].sims += r.Count || 1;
@@ -1301,7 +1477,7 @@ function renderKPIs(data) {
       <div class="kpi-icon">💰</div>
       <div class="kpi-label">إجمالي REV2${isAdmin ? ' (بعد الخصم)' : ''}</div>
       <div class="kpi-value">${fmt(total)}</div>
-      <div class="kpi-sub">ريال سعودي</div>
+      <div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div>
     </div>
     <div class="kpi-card green">
       <div class="kpi-icon">📱</div>
@@ -1320,7 +1496,7 @@ function renderKPIs(data) {
       <div class="kpi-icon">🏆</div>
       <div class="kpi-label">إجمالي العمولات</div>
       <div class="kpi-value">${fmt(totalComm)}</div>
-      <div class="kpi-sub">ريال سعودي</div>
+      <div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div>
     </div>` : ''}
   `;
 
@@ -1330,19 +1506,19 @@ function renderKPIs(data) {
         <div class="kpi-icon">🏭</div>
         <div class="kpi-label">عمولة المنتجات</div>
         <div class="kpi-value">${fmt(comms.reduce((s,c)=>s+c.commProd,0))}</div>
-        <div class="kpi-sub">ريال</div>
+        <div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon">🏠</div>
         <div class="kpi-label">عمولة الإيجار</div>
         <div class="kpi-value">${fmt(comms.reduce((s,c)=>s+c.rent,0))}</div>
-        <div class="kpi-sub">ريال</div>
+        <div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-icon">🤝</div>
         <div class="kpi-label">عمولة الدعم</div>
         <div class="kpi-value">${fmt(comms.reduce((s,c)=>s+c.support,0))}</div>
-        <div class="kpi-sub">ريال</div>
+        <div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div>
       </div>
       <div class="kpi-card">
         <div class="kpi-icon">✅</div>
@@ -1354,14 +1530,14 @@ function renderKPIs(data) {
         <div class="kpi-icon" style="opacity:0.3">💎</div>
         <div class="kpi-label" style="color:rgba(255,255,255,0.8)">إجمالي العمولات الكلي</div>
         <div class="kpi-value" style="color:white; font-size:32px">${fmt(comms.reduce((s,c)=>s+c.totalComm,0))}</div>
-        <div class="kpi-sub" style="color:rgba(255,255,255,0.6)">ريال سعودي · جميع الفروع</div>
+        <div class="kpi-sub" style="color:rgba(255,255,255,0.6)"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span> جميع الفروع</div>
       </div>
     `;
   }
 }
 
 function renderLocationsTable(locStats) {
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = (currentUser?.pages || []).includes('commissions');
   const comms = calcCommissions(locStats);
   const thead = document.querySelector('#table-locations thead tr');
   // Update header dynamically
@@ -1369,7 +1545,7 @@ function renderLocationsTable(locStats) {
     <th>الفرع</th>
     <th>الموظف</th>
     <th>عدد SIMs</th>
-    <th>إجمالي REV2 (ريال)</th>
+    <th>إجمالي REV2</th>
     <th>نسبة التحقيق</th>
     <th>التقدم</th>
     ${isAdmin ? '<th>إيجار الفرع</th>' : ''}
@@ -1388,13 +1564,13 @@ function renderLocationsTable(locStats) {
       <td>${fmt(c.rev2)}</td>
       <td>${badge} ${pct(c.totalAch)}</td>
       <td><div class="progress-wrap"><div class="progress-bar ${barClass}" style="width:${Math.min(pctVal,100)}%"></div></div></td>
-      ${isAdmin ? `<td>${fmt(c.rent)} ريال</td>` : ''}
+      ${isAdmin ? `<td>${fmt(c.rent)} <span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span></td>` : ''}
     </tr>`;
   }).join('');
 }
 
 function renderStaffTable() {
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = (currentUser?.pages || []).includes('commissions');
   const map = {};
   for (const r of currentData) {
     if (!r.STAFF_NO) continue;
@@ -1411,7 +1587,7 @@ function renderStaffTable() {
     <th>رقم الموظف</th>
     <th>الفرع</th>
     <th>عدد SIMs</th>
-    <th>REV2 (ريال)</th>
+    <th>REV2</th>
     <th>نسبة التحقيق</th>
     ${isAdmin ? '<th>عمولة المنتج</th>' : ''}
   `;
@@ -1430,7 +1606,7 @@ function renderStaffTable() {
       <td>${fmt(s.sims)}</td>
       <td>${fmt(s.rev2)}</td>
       <td>${badge}</td>
-      ${isAdmin ? `<td>${fmt(commProd)} ريال</td>` : ''}
+      ${isAdmin ? `<td>${fmt(commProd)} <span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span></td>` : ''}
     </tr>`;
   }).join('');
 }
@@ -1449,10 +1625,10 @@ function renderCommissionsTable(locStats) {
       <td>${fmt(origRevVal * (1 - discountPct/100) / (1 - discountPct/100))}</td>
       <td>${fmt(c.rev2)}</td>
       <td>${badge}</td>
-      <td>${fmt(c.commProd)} ريال</td>
-      <td>${fmt(c.rent)} ريال</td>
-      <td>${fmt(c.support)} ريال</td>
-      <td><strong>${fmt(c.totalComm)} ريال</strong></td>
+      <td>${fmt(c.commProd)} <span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span></td>
+      <td>${fmt(c.rent)} <span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span></td>
+      <td>${fmt(c.support)} <span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span></td>
+      <td><strong>${fmt(c.totalComm)} <span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span></strong></td>
     </tr>`;
   }).join('');
 }
@@ -1467,7 +1643,7 @@ function renderCharts(locStats) {
     data: {
       labels: locStats.map(l => l.loc),
       datasets: [{
-        label: 'REV2 (ريال)',
+        label: 'REV2',
         data: locStats.map(l => l.rev2),
         backgroundColor: colors,
         borderRadius: 8,
@@ -1481,10 +1657,17 @@ function renderCharts(locStats) {
         datalabels: {
           display: true,
           anchor: 'end',
-          align: 'top',
-          color: '#0d2666',
-          font: { family: 'Cairo', weight: 'bold', size: 11 },
-          formatter: v => v ? v.toLocaleString('en-US') : ''
+          align: 'start',
+          offset: 6,
+          clamp: true,
+          clip: false,
+          color: '#ffffff',
+          backgroundColor: 'rgba(13,38,102,0.55)',
+          borderRadius: 4,
+          padding: { top: 2, bottom: 2, left: 4, right: 4 },
+          font: { family: 'Cairo', weight: 'bold', size: 10 },
+          formatter: v => v ? v.toLocaleString('en-US') : '',
+          textAlign: 'center'
         }
       },
       scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('en-US') } } }
@@ -1604,6 +1787,7 @@ function switchTab(name) {
   event.target.classList.add('active');
   if (name === 'overview') renderCharts(getLocStats());
   if (name === 'users') renderUsersTable();
+  if (name === 'cash') { renderCashRulesInputs(); renderCashTab(); }
 }
 
 function applyDiscount() {
@@ -1622,6 +1806,7 @@ function saveSettings() {
   settings.weightSims = parseFloat(document.getElementById('s-weight-sims').value) || 40;
   settings.commLow = parseFloat(document.getElementById('s-comm-low').value) || 10;
   settings.commMid = parseFloat(document.getElementById('s-comm-mid').value) || 15;
+  if (!window._canEditSettings) { alert('❌ ليس لديك صلاحية تعديل الإعدادات'); return; }
   settings.commHigh = parseFloat(document.getElementById('s-comm-high').value) || 20;
   discountPct = parseFloat(document.getElementById('disc-input').value) || 0;
   renderAll();
@@ -1630,6 +1815,7 @@ function saveSettings() {
 }
 
 function loadExcel(event) {
+  if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
   const file = event.target.files[0];
   if (!file) return;
   document.getElementById('file-status').textContent = `جاري تحميل: ${file.name}...`;
@@ -1774,6 +1960,7 @@ function updateStatusBar() {
 }
 
 function loadExcel(event) {
+  if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
   const file = event.target.files[0];
   if (!file) return;
   const statusEl = document.getElementById('file-status');
@@ -1817,6 +2004,170 @@ function loadExcel(event) {
     }
   };
   reader.readAsArrayBuffer(file);
+}
+
+
+// ============ VERSION SYSTEM ============
+function getVersionStr() {
+  try {
+    const v = JSON.parse(localStorage.getItem('st_version') || '{"n":0}');
+    const d = new Date();
+    const ym = d.getFullYear().toString().slice(-2) + '.' + String(d.getMonth()+1).padStart(2,'0');
+    return 'v' + Math.floor(v.n/100) + '.' + Math.floor((v.n%100)/10) + '.' + (v.n%10) + ' | ' + ym;
+  } catch(e) { return 'v1.0.0'; }
+}
+
+function incVersion() {
+  try {
+    const v = JSON.parse(localStorage.getItem('st_version') || '{"n":0}');
+    v.n = (v.n || 0) + 1;
+    localStorage.setItem('st_version', JSON.stringify(v));
+    const el = document.getElementById('login-ver-text');
+    if (el) el.textContent = 'Modern Trade Dashboard · ' + getVersionStr();
+  } catch(e) {}
+}
+
+// ============ REMEMBER ME ============
+function loadRemembered() {
+  try {
+    const u = localStorage.getItem('st_rmb_u');
+    const p = localStorage.getItem('st_rmb_p');
+    if (u && p) {
+      const ui = document.getElementById('login-user');
+      const pi = document.getElementById('login-pass');
+      const ri = document.getElementById('remember-me');
+      if (ui) ui.value = u;
+      if (pi) pi.value = p;
+      if (ri) ri.checked = true;
+    }
+  } catch(e) {}
+}
+
+// ============ DATE FILTER ============
+let filteredData = null;
+
+function updateDataDateBadge(data) {
+  const days = [...new Set(data.filter(d=>d.Day).map(d=>d.Day))].sort((a,b)=>a-b);
+  if (!days.length) return;
+  const el = document.getElementById('data-date-text');
+  const badge = document.getElementById('data-date-badge');
+  if (el) el.textContent = days[0] + ' - ' + days[days.length-1] + ' مايو 2026';
+  if (badge) badge.style.display = 'flex';
+}
+
+function applyDateFilter() {
+  const fv = document.getElementById('filter-from')?.value;
+  const tv = document.getElementById('filter-to')?.value;
+  const from = fv ? parseInt(fv.split('-')[2]) : 0;
+  const to = tv ? parseInt(tv.split('-')[2]) : 0;
+  if (!from && !to) { clearDateFilter(); return; }
+  filteredData = currentData.filter(d => {
+    const day = d.Day || 0;
+    if (from && to) return day >= from && day <= to;
+    if (from) return day >= from;
+    return day <= to;
+  });
+  const label = document.getElementById('date-range-label');
+  if (label) label.textContent = '📆 ' + filteredData.length + ' سجل · يوم ' + (from||'?') + ' → ' + (to||'?');
+  renderAll();
+}
+
+function clearDateFilter() {
+  filteredData = null;
+  const fi = document.getElementById('filter-from');
+  const ti = document.getElementById('filter-to');
+  if (fi) fi.value = '';
+  if (ti) ti.value = '';
+  const label = document.getElementById('date-range-label');
+  if (label) label.textContent = '';
+  renderAll();
+}
+
+function getActiveData() { return filteredData || currentData; }
+
+// ============ CASH SYSTEM ============
+let cashRules = {};
+let cashDiscount = 0;
+
+function loadCashSettings() {
+  try {
+    const s = localStorage.getItem('st_cash_rules');
+    if (s) cashRules = JSON.parse(s);
+    const d = localStorage.getItem('st_cash_disc');
+    if (d) cashDiscount = parseFloat(d) || 0;
+    const inp = document.getElementById('cash-discount-pct');
+    if (inp) inp.value = cashDiscount;
+  } catch(e) {}
+}
+
+function saveCashSettings() {
+  if (!window._canEditCash) { alert('❌ ليس لديك صلاحية تعديل إعدادات الكاش'); return; }
+  cashDiscount = parseFloat(document.getElementById('cash-discount-pct')?.value || 0);
+  localStorage.setItem('st_cash_rules', JSON.stringify(cashRules));
+  localStorage.setItem('st_cash_disc', cashDiscount.toString());
+  incVersion();
+  renderCashTab();
+  markUnsaved();
+  alert('✅ تم حفظ إعدادات الكاش');
+}
+
+function renderCashRulesInputs() {
+  const addonVals = [...new Set(currentData.map(d => d.Addon_Value || 0).filter(v => v > 0))].sort((a,b)=>a-b);
+  const container = document.getElementById('cash-rules-list');
+  if (!container) return;
+  // SAR symbol (new Saudi Riyal identity)
+  const SAR = '<span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span>';
+  container.innerHTML = addonVals.map(v => {
+    const vat = (v * 1.15).toFixed(2);
+    return `
+    <div style="display:flex;flex-direction:column;gap:4px;background:#f0f4fb;padding:10px 14px;border-radius:12px;min-width:200px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:13px;font-weight:800;color:#0d2666;">باقة ${v} ${SAR}</span>
+      </div>
+      <div style="font-size:11px;color:#6b7280;">شامل الضريبة: <strong style="color:#1a4db5;">${vat} ${SAR}</strong></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+        <span style="font-size:11px;color:#374151;font-weight:600;">الكاش المحصل</span>
+        <input type="number" style="width:80px;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;text-align:center;" 
+          value="${cashRules[v] !== undefined ? cashRules[v] : v}" 
+          onchange="cashRules[${v}]=parseFloat(this.value)||0; updateCashPreview();">
+        <span style="font-size:11px;color:#9ca3af;">${SAR}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateCashPreview() {
+  cashDiscount = parseFloat(document.getElementById('cash-discount-pct')?.value || 0);
+  renderCashTab();
+}
+
+function renderCashTab() {
+  const data = getActiveData();
+  const locMap = {};
+  for (const r of data) {
+    if (!r.Location) continue;
+    if (!locMap[r.Location]) locMap[r.Location] = { loc: r.Location, staff: r.STAFF_NO, units: 0, cashBefore: 0 };
+    locMap[r.Location].units += r.Count || 1;
+    const addonVal = r.Addon_Value || 0;
+    const cashVal = cashRules[addonVal] !== undefined ? cashRules[addonVal] : addonVal;
+    locMap[r.Location].cashBefore += cashVal * (r.Count || 1);
+  }
+  const locs = Object.values(locMap).sort((a,b)=>b.cashBefore-a.cashBefore);
+  const totalBefore = locs.reduce((s,l)=>s+l.cashBefore, 0);
+  const totalAfter = totalBefore * (1 - cashDiscount/100);
+
+  const kg = document.getElementById('cash-kpi-grid');
+  if (kg) kg.innerHTML = `
+    <div class="kpi-card"><div class="kpi-icon">💵</div><div class="kpi-label">الكاش قبل الخصم</div><div class="kpi-value">${fmt(totalBefore)}</div><div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div></div>
+    <div class="kpi-card green"><div class="kpi-icon">✅</div><div class="kpi-label">الكاش بعد الخصم (${cashDiscount}%)</div><div class="kpi-value">${fmt(totalAfter)}</div><div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div></div>
+    <div class="kpi-card orange"><div class="kpi-icon">✂️</div><div class="kpi-label">قيمة الخصم</div><div class="kpi-value">${fmt(totalBefore-totalAfter)}</div><div class="kpi-sub"><span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.4em;font-weight:900;line-height:1;">&#x20C1;</span></div></div>`;
+
+  const tb = document.getElementById('tbody-cash');
+  const SAR = '<span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span>';
+  if (tb) tb.innerHTML = locs.map(l => {
+    const after = l.cashBefore * (1 - cashDiscount/100);
+    return `<tr><td><strong>${l.loc}</strong></td><td>${l.staff||'-'}</td><td>${fmt(l.units)}</td><td>${fmt(l.cashBefore)} ${SAR}</td><td><strong>${fmt(after)} ${SAR}</strong></td></tr>`;
+  }).join('');
 }
 
 // ============ INIT ============
