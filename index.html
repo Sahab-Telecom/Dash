@@ -670,6 +670,21 @@
     line-height: 1;
   }
 
+
+  /* Force English digits everywhere */
+  * { font-variant-numeric: ltr; }
+  input[type="date"], input[type="number"],
+  input[type="text"][dir="ltr"] {
+    direction: ltr;
+    text-align: left;
+    font-variant-numeric: normal;
+  }
+  /* Force English numerals in all spans/divs */
+  .kpi-value, .chart-wrap, table td, table th,
+  #date-filter-bar, .kpi-sub { 
+    font-feature-settings: "tnum";
+  }
+
 </style>
 </head>
 <body>
@@ -682,11 +697,11 @@
     <div class="login-subtitle">سحاب تيليكوم · لوحة المبيعات</div>
     <div class="login-field">
       <label>اسم المستخدم</label>
-      <input type="text" id="login-user" placeholder="أدخل اسم المستخدم" autocomplete="username" onkeydown="if(event.key==='Enter') doLogin()">
+      <input type="text" id="login-user" placeholder="أدخل اسم المستخدم" autocomplete="username" name="username" onkeydown="if(event.key==='Enter') doLogin()">
     </div>
     <div class="login-field">
       <label>كلمة المرور</label>
-      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" name="password" onkeydown="if(event.key==='Enter') doLogin()">
     </div>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280;margin-bottom:4px;cursor:pointer;justify-content:flex-end;">
       <input type="checkbox" id="remember-me" style="width:15px;height:15px;accent-color:#1a4db5;">
@@ -694,7 +709,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">🔐 تسجيل الدخول</button>
     <div class="login-error" id="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
-    <div class="login-version" id="login-ver-text">Modern Trade Dashboard v2.0</div>
+    <div class="login-version" id="login-ver-text">Sahab Dashboard v2.0</div>
   </div>
 </div>
 
@@ -765,11 +780,11 @@
     <span style="font-size:13px;font-weight:700;color:#0d2666;">📅 فلتر التاريخ</span>
     <div style="display:flex;align-items:center;gap:8px;">
       <label style="font-size:12px;color:#6b7280;font-weight:600;">من:</label>
-      <input type="date" id="filter-from" class="field-input" style="width:145px;padding:7px 10px;" onchange="applyDateFilter()">
+      <input type="date" id="filter-from" lang="en" class="field-input" style="width:145px;padding:7px 10px;" onchange="applyDateFilter()">
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <label style="font-size:12px;color:#6b7280;font-weight:600;">إلى:</label>
-      <input type="date" id="filter-to" class="field-input" style="width:145px;padding:7px 10px;" onchange="applyDateFilter()">
+      <input type="date" id="filter-to" lang="en" class="field-input" style="width:145px;padding:7px 10px;" onchange="applyDateFilter()">
     </div>
     <button onclick="clearDateFilter()" style="background:#f1f5f9;color:#374151;border:none;padding:7px 16px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">✕ إزالة الفلتر</button>
     <div id="date-range-label" style="font-size:12px;color:#6b7280;margin-right:auto;"></div>
@@ -871,7 +886,7 @@
         <h3>🎯 إعدادات التارجت</h3>
         <div class="field-row">
           <span class="field-label">تارجت REV2 للفرع (ريال)</span>
-          <input type="number" class="field-input" id="s-target-rev" value="12000">
+          <input type="number" class="field-input" id="s-target-rev" style="direction:ltr;text-align:left;" value="12000">
         </div>
         <div class="field-row">
           <span class="field-label">تارجت SIMs للفرع</span>
@@ -1109,7 +1124,10 @@ function checkSession() {
   const saved = localStorage.getItem('st_user');
   if (saved) {
     try {
-      currentUser = JSON.parse(saved);
+      const parsedUser = JSON.parse(saved);
+      // Refresh from current USERS list to get latest pages/actions
+      const fresh = USERS.find(u => u.username === parsedUser.username);
+      currentUser = fresh || parsedUser;
       showDashboard();
     } catch(e) { showLogin(); }
   } else {
@@ -1122,7 +1140,7 @@ function showLogin() {
   document.body.classList.add('login-open');
   document.body.style.overflow = 'hidden';
   loadRemembered();
-  setTimeout(() => { const vEl=document.getElementById('login-ver-text'); if(vEl) vEl.textContent='Modern Trade Dashboard · '+getVersionStr(); }, 100);
+  setTimeout(() => { const vEl=document.getElementById('login-ver-text'); if(vEl) vEl.textContent='Sahab Dashboard '+getVersionStr(); }, 100);
   setTimeout(() => document.getElementById('login-user').focus(), 150);
 }
 
@@ -2011,20 +2029,18 @@ function loadExcel(event) {
 // ============ VERSION SYSTEM ============
 function getVersionStr() {
   try {
-    const v = JSON.parse(localStorage.getItem('st_version') || '{"n":0}');
-    const d = new Date();
-    const ym = d.getFullYear().toString().slice(-2) + '.' + String(d.getMonth()+1).padStart(2,'0');
-    return 'v' + Math.floor(v.n/100) + '.' + Math.floor((v.n%100)/10) + '.' + (v.n%10) + ' | ' + ym;
-  } catch(e) { return 'v1.0.0'; }
+    const v = JSON.parse(localStorage.getItem('st_version') || '{"major":2,"minor":0}');
+    return 'v' + v.major + '.' + v.minor;
+  } catch(e) { return 'v2.0'; }
 }
 
 function incVersion() {
   try {
-    const v = JSON.parse(localStorage.getItem('st_version') || '{"n":0}');
-    v.n = (v.n || 0) + 1;
+    const v = JSON.parse(localStorage.getItem('st_version') || '{"major":2,"minor":0}');
+    v.minor = (v.minor || 0) + 1;
     localStorage.setItem('st_version', JSON.stringify(v));
     const el = document.getElementById('login-ver-text');
-    if (el) el.textContent = 'Modern Trade Dashboard · ' + getVersionStr();
+    if (el) el.textContent = 'Sahab Dashboard ' + getVersionStr();
   } catch(e) {}
 }
 
@@ -2073,7 +2089,7 @@ function applyDateFilter() {
     return true;
   });
   const label = document.getElementById('date-range-label');
-  if (label) label.textContent = '📆 ' + filteredData.length + ' سجل · يوم ' + (from||'?') + ' → ' + (to||'?');
+  if (label) label.textContent = '📆 ' + filteredData.length.toLocaleString('en-US') + ' سجل · يوم ' + (from||'?') + ' → ' + (to||'?');
   console.log('[DateFilter] from:', from, 'to:', to, 'results:', filteredData.length);
   renderAll();
 }
