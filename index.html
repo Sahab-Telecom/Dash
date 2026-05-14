@@ -1450,9 +1450,19 @@ let charts = {};
 function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
 function pct(n) { return n.toFixed(1) + '%'; }
 
+// جدول نسب العمولة من الإكسيل (Sheet1)
+const COMM_RATE_TABLE = {
+  0:0, 10:0.10, 35:0.10, 60:0.10,
+  70:0.15, 80:0.15, 95:0.15, 104:0.15,
+  120:0.20, 130:0.20, 160:0.20, 200:0.20,
+  300:0.20, 325:0.20, 350:0.20, 975:0.20
+};
 function getCommRate(addonVal) {
-  if (addonVal < 80) return settings.commLow / 100;
-  if (addonVal <= 120) return settings.commMid / 100;
+  const v = Math.round(addonVal);
+  if (COMM_RATE_TABLE[v] !== undefined) return COMM_RATE_TABLE[v];
+  if (addonVal <= 0)   return 0;
+  if (addonVal < 80)   return settings.commLow  / 100;
+  if (addonVal <= 120) return settings.commMid   / 100;
   return settings.commHigh / 100;
 }
 
@@ -1464,19 +1474,22 @@ function getLocStats() {
     map[r.Location].sims += r.Count || 1;
     const rev2 = (r.REV2 || 0) * (1 - discountPct / 100);
     map[r.Location].rev2 += rev2;
-    map[r.Location].commProd += rev2 * getCommRate(rev2);  // rate based on REV2 per row
+    map[r.Location].commProd += rev2 * getCommRate(r.Addon_Value || 0);  // rate from Addon_Value lookup
   }
   return Object.values(map).sort((a, b) => b.rev2 - a.rev2);
 }
 
 function calcCommissions(locStats) {
   return locStats.map(ls => {
-    const totalAch = ls.rev2 / settings.targetRev;
+    const totalAch  = ls.rev2 / settings.targetRev;
     const qualifies = totalAch >= settings.threshold / 100;
+    // عمولة المنتج = المبدئية × نسبة التحقيق (كما في الإكسيل)
+    const commProdPrelim = ls.commProd;                                  // sum(REV2 * rate) per row
+    const commProd = qualifies ? commProdPrelim * totalAch : 0;          // × نسبة التحقيق
     const rent     = qualifies ? settings.rentYes : 0;
     const support  = qualifies ? settings.supportMax * Math.min(totalAch, 1) : 0;
-    const commProd = qualifies ? ls.commProd : 0;   // عمولة المنتج = 0 لو ما حقق
-    return { ...ls, commProd, totalAch: totalAch * 100, qualifies, rent, support, totalComm: commProd + rent + support };
+    return { ...ls, commProd, commProdPrelim, totalAch: totalAch * 100, qualifies, rent, support,
+             totalComm: commProd + rent + support };
   });
 }
 
@@ -1596,7 +1609,7 @@ function renderStaffTable() {
     map[r.STAFF_NO].sims += r.Count || 1;
     const rev2 = (r.REV2 || 0) * (1 - discountPct / 100);
     map[r.STAFF_NO].rev2 += rev2;
-    map[r.STAFF_NO].commProd += rev2 * getCommRate(rev2);  // rate based on REV2 per row
+    map[r.STAFF_NO].commProd += rev2 * getCommRate(r.Addon_Value || 0);  // rate from Addon_Value lookup
   }
   const arr = Object.values(map).sort((a, b) => b.rev2 - a.rev2);
 
