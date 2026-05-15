@@ -1888,54 +1888,82 @@ async function loadExcel(event) {
   if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
   const file = event.target.files[0];
   if (!file) return;
-  document.getElementById('file-status').textContent = `جاري تحميل: ${file.name}...`;
-  const reader = new FileReader();
-  reader.onload = (e) => {
+
+  const statusEl = document.getElementById('file-status');
+  statusEl.textContent = `⏳ جاري تحميل: ${file.name}...`;
+
+  try {
+    // ── قراءة الملف ──
+    const arrayBuffer = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = e => reject(e);
+      reader.readAsArrayBuffer(file);
+    });
+
+    // ── تحليل الإكسيل ──
+    const wb   = XLSX.read(arrayBuffer, { type: 'array' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    if (!rows.length) { statusEl.textContent = '❌ الملف فارغ'; return; }
+
+    // ── تطبيع الأعمدة ──
+    const norm = (row, keys) => { for (const k of keys) if (row[k] !== undefined) return row[k]; return null; };
+    const colMap = {
+      STAFF_NO:    ['STAFF_NO','staff','Staff'],
+      Location:    ['Location','location'],
+      PK:          ['PK','pk'],
+      REV2:        ['REV2','rev2','Revenue'],
+      Addon_Value: ['Addon Value','Addon_Value','addon_value'],
+      Count:       ['Count','count','qty'],
+      Day:         ['SUBSTR(CREATE_DATE,1,10) - Day','Day','day']
+    };
+
+    const newData = rows.map(r => ({
+      STAFF_NO:    norm(r, colMap.STAFF_NO),
+      Location:    norm(r, colMap.Location),
+      PK:          norm(r, colMap.PK),
+      REV2:        parseFloat(norm(r, colMap.REV2))        || 0,
+      Addon_Value: parseFloat(norm(r, colMap.Addon_Value)) || 0,
+      Count:       parseFloat(norm(r, colMap.Count))       || 1,
+      Day:         parseInt(norm(r, colMap.Day))           || 0
+    })).filter(r => r.STAFF_NO && r.Location);
+
+    if (!newData.length) { statusEl.textContent = '❌ لم يتم إيجاد بيانات صحيحة في الملف'; return; }
+
+    // ── تحديث الذاكرة ──
+    RAW_DATA    = newData;
+    currentData = newData;
+
+    // ── حفظ محلي ──
+    const dataStr = JSON.stringify(newData);
+    const meta    = { name: file.name, count: newData.length, at: new Date().toISOString(), by: currentUser?.username || 'admin' };
+    localStorage.setItem('st_data',      dataStr);
+    localStorage.setItem('st_data_meta', JSON.stringify(meta));
+
+    statusEl.textContent = `☁️ جاري الرفع لـ Firebase (${newData.length} سجل)...`;
+
+    // ── رفع لـ Firebase ──
     try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws);
-      if (rows.length > 0) {
-        // Map columns
-        const colMap = { STAFF_NO: ['STAFF_NO','staff','Staff'], Location: ['Location','location'], PK: ['PK','pk'], REV2: ['REV2','rev2','Revenue'], Addon_Value: ['Addon Value','Addon_Value','addon_value'], Count: ['Count','count','qty'] };
-        const normalize = (row, keys) => { for (const k of keys) if (row[k] !== undefined) return row[k]; return null; };
-        currentData = rows.map(r => ({
-          STAFF_NO: normalize(r, colMap.STAFF_NO),
-          Location: normalize(r, colMap.Location),
-          PK: normalize(r, colMap.PK),
-          REV2: parseFloat(normalize(r, colMap.REV2)) || 0,
-          Addon_Value: parseFloat(normalize(r, colMap.Addon_Value)) || 0,
-          Count: parseFloat(normalize(r, colMap.Count)) || 1,
-          Day: r['SUBSTR(CREATE_DATE,1,10) - Day'] || r.Day || 0
-        })).filter(r => r.STAFF_NO && r.Location);
-
-        // ── تحديث RAW_DATA في الذاكرة ──
-        RAW_DATA = currentData;
-        // ── حفظ في localStorage ──
-        const dataStr = JSON.stringify(currentData);
-        const meta = { name: file.name, count: currentData.length, at: new Date().toISOString(), by: currentUser?.username || 'admin' };
-        localStorage.setItem('st_data', dataStr);
-        localStorage.setItem('st_data_meta', JSON.stringify(meta));
-
-        // ── رفع لـ Firebase (مشترك لكل المستخدمين) ──
-        document.getElementById('file-status').textContent = '☁️ جاري الرفع لقاعدة البيانات...';
-        sharedSet('st_data', dataStr).then(() => {
-          sharedSet('st_update_meta', JSON.stringify(meta));
-          incVersion();
-          document.getElementById('file-status').textContent = `✅ ${file.name} · ${currentData.length} سجل · محفوظ ☁️`;
-          renderAll();
-          updateDataDateBadge(currentData);
-        }).catch(() => {
-          document.getElementById('file-status').textContent = `✅ ${file.name} · ${currentData.length} سجل (محفوظ محلياً فقط)`;
-          renderAll();
-        });
-      }
-    } catch(err) {
-      console.error('Excel read error:', err);
-      document.getElementById('file-status').textContent = `❌ خطأ في قراءة الملف: ${err.message}`;
+      await sharedSet('st_data',       dataStr);
+      await sharedSet('st_data_meta',  JSON.stringify(meta));
+      await sharedSet('st_update_meta', JSON.stringify(meta));
+      incVersion();
+      statusEl.textContent = `✅ ${file.name} · ${newData.length} سجل · محفوظ ☁️`;
+      showSyncStatus('☁️ البيانات محفوظة', '#10b981');
+    } catch(fbErr) {
+      console.warn('Firebase upload failed:', fbErr);
+      statusEl.textContent = `✅ ${file.name} · ${newData.length} سجل (محفوظ محلياً — Firebase فشل)`;
     }
-  };
-  reader.readAsArrayBuffer(file);
+
+    renderAll();
+    updateDataDateBadge(currentData);
+    updateLastUpdateBadge();
+
+  } catch(err) {
+    console.error('Excel read error:', err);
+    statusEl.textContent = `❌ خطأ في قراءة الملف: ${err.message}`;
+  }
 }
 
 // ============ SAVE / UNSAVED INDICATOR ============
