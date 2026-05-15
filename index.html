@@ -1130,11 +1130,18 @@ function checkSession() {
   if (saved) {
     try {
       const parsedUser = JSON.parse(saved);
-      // Refresh from current USERS list to get latest pages/actions
-      const fresh = USERS.find(u => u.username === parsedUser.username);
+      // Refresh from current USERS list (case-insensitive)
+      const fresh = USERS.find(u => u.username.toLowerCase() === parsedUser.username.toLowerCase());
       currentUser = fresh || parsedUser;
+      // Ensure pages/actions are set
+      if (!currentUser.pages)   currentUser.pages   = defaultPerms(currentUser.role).pages;
+      if (!currentUser.actions) currentUser.actions = defaultPerms(currentUser.role).actions;
       showDashboard();
-    } catch(e) { showLogin(); }
+    } catch(e) {
+      console.warn('Session restore failed:', e);
+      localStorage.removeItem('st_user');
+      showLogin();
+    }
   } else {
     showLogin();
   }
@@ -1160,8 +1167,10 @@ function doLogin() {
     document.getElementById('login-overlay').style.display = 'none';
     document.body.classList.remove('login-open');
     document.body.style.overflow = '';
-    if (document.getElementById('remember-me')?.checked) {
-      localStorage.setItem('st_rmb_u', u);
+    // Save remember me BEFORE showDashboard
+    const rememberMe = document.getElementById('remember-me')?.checked;
+    if (rememberMe) {
+      localStorage.setItem('st_rmb_u', u_in);
       localStorage.setItem('st_rmb_p', p);
     } else {
       localStorage.removeItem('st_rmb_u');
@@ -2072,8 +2081,8 @@ function loadRemembered() {
       const ui = document.getElementById('login-user');
       const pi = document.getElementById('login-pass');
       const ri = document.getElementById('remember-me');
-      if (ui) ui.value = u;
-      if (pi) pi.value = p;
+      if (ui) { ui.value = u; ui.dispatchEvent(new Event('input')); }
+      if (pi) { pi.value = p; pi.dispatchEvent(new Event('input')); }
       if (ri) ri.checked = true;
     }
   } catch(e) {}
@@ -2225,11 +2234,19 @@ const firebaseConfig = {
 };
 
 let _db = null;
+let _fbInitialized = false;
+
 function getDB() {
   if (_db) return _db;
   try {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    else firebase.app();
+    if (typeof firebase === 'undefined') {
+      console.warn('Firebase not available, using localStorage');
+      return null;
+    }
+    if (!_fbInitialized) {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      _fbInitialized = true;
+    }
     _db = firebase.database();
   } catch(e) { console.warn('Firebase init error:', e); }
   return _db;
@@ -2310,24 +2327,39 @@ function listenForChanges() {
     if (!snap.exists()) return;
     const newMeta = snap.val().v;
     const localMeta = localStorage.getItem('st_data_meta');
-    if (newMeta !== localMeta) {
-      // New data uploaded by admin — reload all data
-      syncFromShared().then(() => {
+    if (newMeta && newMeta !== localMeta) {
+      // New data uploaded by admin — sync only data keys (NOT users/session)
+      const dataKeys = ['st_data','st_data_meta','st_settings','st_discount','st_cash_rules','st_cash_disc','st_update_meta'];
+      Promise.all(dataKeys.map(k => {
+        const sk = k.replace(/[.#$\[\]]/g,'_');
+        return db.ref('sahab/'+sk).once('value').then(s => {
+          if (s.exists()) localStorage.setItem(k, s.val().v);
+        });
+      })).then(() => {
         loadSavedSettings();
         loadExcelFromStorage();
         loadCashSettings();
+        renderAll();
         const badge = document.getElementById('sync-alert');
-        if (badge) {
-          badge.style.display = 'flex';
-          setTimeout(() => { badge.style.display='none'; }, 5000);
-        }
+        if (badge) { badge.style.display='flex'; setTimeout(()=>{badge.style.display='none';},4000); }
       });
     }
   });
 }
 
 // ============ INIT ============
-syncFromShared().then(() => { checkSession(); listenForChanges(); });
+let _appStarted = false;
+function startApp() {
+  if (_appStarted) return;
+  _appStarted = true;
+  syncFromShared().then(() => {
+    checkSession();
+    setTimeout(listenForChanges, 1000);
+  });
+}
+
+// Always wait for full page load to ensure Firebase SDK is ready
+window.addEventListener('load', () => setTimeout(startApp, 300));
 </script>
 </body>
 </html>
