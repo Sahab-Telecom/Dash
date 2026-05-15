@@ -7,6 +7,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -759,6 +760,7 @@
     <button class="tab-btn" id="tab-btn-settings" onclick="switchTab('settings')">⚙️ الإعدادات</button>
     <button class="tab-btn" id="tab-btn-users" onclick="switchTab('users')" style="display:none">👥 المستخدمون</button>
     <button class="tab-btn" id="tab-btn-cash" onclick="switchTab('cash')" style="display:none">💵 الكاش</button>
+    <button class="tab-btn" id="tab-btn-files" onclick="switchTab('files')" style="display:none">🗄️ مستودع البيانات</button>
   </div>
 </div>
 
@@ -1245,6 +1247,8 @@ function showDashboard() {
   updateLastUpdateBadge();
   const cashBtn = document.getElementById('tab-btn-cash');
   if (cashBtn) cashBtn.style.display = (currentUser?.role === 'admin' || currentUser?.role === 'supervisor') ? '' : 'none';
+  const filesBtn = document.getElementById('tab-btn-files');
+  if (filesBtn) filesBtn.style.display = (currentUser?.role === 'admin') ? '' : 'none';
   // تحميل البيانات المحفوظة من localStorage (محدّثة من الأدمن)
   const savedData = loadDataFromStorage();
   if (savedData) {
@@ -1840,6 +1844,7 @@ function switchTab(name) {
   if (name === 'overview') renderCharts(getLocStats());
   if (name === 'users') renderUsersTable();
   if (name === 'cash') { renderCashRulesInputs(); renderCashTab(); }
+  if (name === 'files') { loadFilesList(); }
 }
 
 function applyDiscount() {
@@ -1910,7 +1915,8 @@ async function loadExcel(event) {
       REV2:        parseFloat(norm(r, colMap.REV2))        || 0,
       Addon_Value: parseFloat(norm(r, colMap.Addon_Value)) || 0,
       Count:       parseFloat(norm(r, colMap.Count))       || 1,
-      Day:         parseInt(norm(r, colMap.Day))           || 0
+      Day:         parseInt(norm(r, colMap.Day))           || 0,
+      Month:       norm(r, ['SUBSTR(CREATE_DATE,1,10) - Month','Month','month']) || ''
     })).filter(r => r.STAFF_NO && r.Location);
 
     if (!newData.length) { statusEl.textContent = '❌ لم يتم إيجاد بيانات صحيحة في الملف'; return; }
@@ -2448,6 +2454,261 @@ function loadExcelFromStorage() {
   return false;
 }
 
+
+// ============ FILE REPOSITORY ============
+const FILES_DB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab_files';
+
+async function uploadFileToRepo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  const progress = document.getElementById('file-upload-progress');
+  const label    = document.getElementById('file-upload-label');
+  const pctEl    = document.getElementById('file-upload-pct');
+  const bar      = document.getElementById('file-upload-bar');
+  progress.style.display = 'block';
+  bar.style.background = 'linear-gradient(90deg,#1a4db5,#10b981)';
+
+  const setProgress = (p, msg) => {
+    bar.style.width = p + '%';
+    pctEl.textContent = p + '%';
+    label.textContent = msg;
+  };
+
+  try {
+    // ── 1. قراءة الملف ──
+    setProgress(10, 'جاري قراءة الملف...');
+    const arrayBuffer = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.onerror = rej;
+      r.readAsArrayBuffer(file);
+    });
+
+    // ── 2. تحليل الإكسيل ──
+    setProgress(25, 'جاري تحليل البيانات...');
+    const wb   = XLSX.read(arrayBuffer, { type: 'array' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    const norm = (row, keys) => { for (const k of keys) if (row[k] !== undefined) return row[k]; return null; };
+    const data = rows.map(r => ({
+      STAFF_NO:    norm(r, ['STAFF_NO','staff']),
+      Location:    norm(r, ['Location','location']),
+      PK:          norm(r, ['PK','pk']),
+      REV2:        parseFloat(norm(r, ['REV2','rev2'])) || 0,
+      Addon_Value: parseFloat(norm(r, ['Addon Value','Addon_Value'])) || 0,
+      Count:       parseFloat(norm(r, ['Count','count'])) || 1,
+      Day:         parseInt(norm(r, ['SUBSTR(CREATE_DATE,1,10) - Day','Day'])) || 0,
+      Month:       norm(r, ['SUBSTR(CREATE_DATE,1,10) - Month','Month','month']) || ''
+    })).filter(r => r.STAFF_NO && r.Location);
+
+    if (!data.length) { alert('لم يتم إيجاد بيانات في الملف'); progress.style.display='none'; return; }
+
+    // ── 3. حساب معلومات الملف ──
+    const days = [...new Set(data.map(d => d.Day).filter(d => d > 0))].sort((a,b)=>a-b);
+    const locs = [...new Set(data.map(d => d.Location))];
+    const fileId = 'f_' + Date.now();
+    const months = [...new Set(data.map(d => d.Month).filter(Boolean))];
+    const monthAr = { Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر' };
+    const monthNames = months.map(m => monthAr[m] || m).join(' / ');
+    const fileInfo = {
+      id:          fileId,
+      name:        file.name,
+      sizeMB:      (file.size / 1024 / 1024).toFixed(2),
+      count:       data.length,
+      locations:   locs.length,
+      dayFrom:     days[0] || 0,
+      dayTo:       days[days.length-1] || 0,
+      months:      monthNames,
+      uploadedBy:  currentUser?.username || 'admin',
+      uploadedAt:  new Date().toISOString(),
+      storagePath: 'excel_files/' + fileId + '.json'
+    };
+
+    // ── 4. رفع ملف الإكسيل لـ Firebase Storage ──
+    setProgress(40, 'جاري رفع الملف لـ Storage...');
+
+    let storageOk = false;
+    try {
+      if (typeof firebase !== 'undefined' && firebase.apps.length) {
+        const storage   = firebase.storage();
+        const storageRef = storage.ref(fileInfo.storagePath);
+        const dataBlob  = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+        // رفع مع تتبع التقدم
+        await new Promise((resolve, reject) => {
+          const task = storageRef.put(dataBlob);
+          task.on('state_changed',
+            snap => {
+              const p = Math.round(40 + (snap.bytesTransferred / snap.totalBytes) * 45);
+              setProgress(p, 'جاري رفع الملف... ' + p + '%');
+            },
+            reject,
+            resolve
+          );
+        });
+        storageOk = true;
+        fileInfo.downloadURL = await storageRef.getDownloadURL();
+      }
+    } catch(storErr) {
+      console.warn('Storage upload failed, using REST:', storErr);
+    }
+
+    // fallback: رفع كـ JSON مباشر في Realtime Database لو Storage فشل
+    if (!storageOk) {
+      setProgress(70, 'جاري حفظ البيانات...');
+      const res = await fetch(FILES_DB_URL + '/' + fileId + '/data.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ v: JSON.stringify(data), t: Date.now() })
+      });
+      if (!res.ok) throw new Error('فشل الرفع: ' + res.status);
+      fileInfo.storedInRTDB = true;
+    }
+
+    // ── 5. حفظ معلومات الملف في Realtime Database ──
+    setProgress(92, 'جاري حفظ معلومات الملف...');
+    const metaRes = await fetch(FILES_DB_URL + '/' + fileId + '/info.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fileInfo)
+    });
+    if (!metaRes.ok) throw new Error('فشل حفظ المعلومات');
+
+    setProgress(100, 'تم الرفع بنجاح!');
+    setTimeout(() => { progress.style.display = 'none'; }, 2000);
+    loadFilesList();
+
+  } catch(e) {
+    console.error('Upload error:', e);
+    label.textContent = 'خطأ في الرفع: ' + e.message;
+    bar.style.background = '#ef4444';
+    setTimeout(() => { progress.style.display = 'none'; }, 4000);
+  }
+}
+
+async function loadFilesList() {
+  const container = document.getElementById('files-repo-list');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:30px;">🔄 جاري التحميل...</div>';
+
+  try {
+    const res = await fetch(FILES_DB_URL + '.json');
+    const data = await res.json();
+
+    if (!data) {
+      container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">📭 لا توجد ملفات مرفوعة بعد</div>';
+      return;
+    }
+
+    const activeId = localStorage.getItem('st_active_file_id') || '';
+    const files = Object.entries(data)
+      .filter(([id, v]) => v.info)
+      .map(([id, v]) => ({ id, ...v.info }))
+      .sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+
+    if (!files.length) {
+      container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات</div>';
+      return;
+    }
+
+    container.innerHTML = files.map(f => {
+      const isActive = f.id === activeId;
+      const date = new Date(f.uploadedAt).toLocaleDateString('ar-SA', { dateStyle: 'medium' });
+      const time = new Date(f.uploadedAt).toLocaleTimeString('ar-SA', { timeStyle: 'short' });
+      return '<div style="background:' + (isActive ? '#f0fdf4' : '#fafafa') + ';border:2px solid ' + (isActive ? '#10b981' : '#e5e7eb') + ';border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'
+        + '<div style="flex:1;min-width:200px;">'
+        + '<div style="font-size:14px;font-weight:700;color:#0d2666;margin-bottom:4px;">' + f.name + (isActive ? ' <span style="background:#10b981;color:white;font-size:10px;padding:2px 8px;border-radius:8px;margin-right:6px;">✓ نشط</span>' : '') + '</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;">'
+        + '<span style="font-size:12px;color:#6b7280;">📊 ' + f.count.toLocaleString('en-US') + ' سجل</span>'
+        + '<span style="font-size:12px;color:#6b7280;">📍 ' + f.locations + ' فرع</span>'
+        + '<span style="font-size:12px;color:#6b7280;">📅 ' + (f.months || '') + ' · يوم ' + f.dayFrom + ' - ' + f.dayTo + '</span>'
+        + '<span style="font-size:12px;color:#9ca3af;">رفعه: ' + f.uploadedBy + ' - ' + date + ' ' + time + '</span>'
+        + '</div></div>'
+        + '<div style="display:flex;gap:8px;flex-shrink:0;">'
+        + (isActive ? '<span style="background:#d1fae5;color:#065f46;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;">✓ الملف النشط</span>'
+                    : '<button onclick="activateFile('' + f.id + '')" style="background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:8px 16px;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">▶ تفعيل</button>')
+        + '<button onclick="deleteFile('' + f.id + '')" style="background:#fee2e2;color:#b91c1c;border:none;padding:8px 12px;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;cursor:pointer;">🗑️</button>'
+        + '</div></div>';
+    }).join('');
+
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;color:#ef4444;padding:30px;">❌ خطأ في التحميل: ' + e.message + '</div>';
+  }
+}
+
+async function activateFile(fileId) {
+  const btn = event.target;
+  const origText = btn.textContent;
+  btn.textContent = 'جاري التفعيل...';
+  btn.disabled = true;
+
+  try {
+    // ── جلب معلومات الملف اولاً ──
+    const infoRes = await fetch(FILES_DB_URL + '/' + fileId + '/info.json');
+    const info = await infoRes.json();
+    if (!info) { alert('فشل تحميل معلومات الملف'); btn.textContent=origText; btn.disabled=false; return; }
+
+    let data = null;
+
+    // ── حاول من Storage أولاً ──
+    if (info.downloadURL) {
+      try {
+        btn.textContent = 'جاري التحميل من Storage...';
+        const r = await fetch(info.downloadURL);
+        data = await r.json();
+      } catch(e) { console.warn('Storage fetch failed, trying RTDB'); }
+    }
+
+    // ── fallback: من Realtime Database ──
+    if (!data) {
+      btn.textContent = 'جاري التحميل من قاعدة البيانات...';
+      const res = await fetch(FILES_DB_URL + '/' + fileId + '/data.json');
+      const dataObj = await res.json();
+      if (!dataObj || !dataObj.v) { alert('فشل تحميل البيانات'); btn.textContent=origText; btn.disabled=false; return; }
+      data = JSON.parse(dataObj.v);
+    }
+    const infoRes = await fetch(FILES_DB_URL + '/' + fileId + '/info.json');
+    const info = await infoRes.json();
+
+    // تحديث الداشبورد
+    RAW_DATA = data;
+    currentData = data.filter(d => d.STAFF_NO && d.Location);
+
+    // حفظ في localStorage وFirebase الرئيسي
+    const dataStr = JSON.stringify(data);
+    localStorage.setItem('st_data', dataStr);
+    localStorage.setItem('st_active_file_id', fileId);
+    localStorage.setItem('st_data_meta', JSON.stringify(info));
+
+    // إشعار باقي المستخدمين عبر Firebase
+    await sharedSet('st_data', dataStr);
+    await sharedSet('st_data_meta', JSON.stringify(info));
+    await sharedSet('st_update_meta', JSON.stringify({ ...info, activatedAt: new Date().toISOString(), activatedBy: currentUser?.username }));
+
+    incVersion();
+    renderAll();
+    updateDataDateBadge(currentData);
+    updateLastUpdateBadge();
+    loadFilesList();
+    showSyncStatus('✅ تم تفعيل الملف لجميع المستخدمين', '#10b981');
+
+  } catch(e) {
+    alert('❌ خطأ: ' + e.message);
+    btn.textContent = '▶ تفعيل';
+    btn.disabled = false;
+  }
+}
+
+async function deleteFile(fileId) {
+  if (!confirm('هل تريد حذف هذا الملف نهائياً؟')) return;
+  try {
+    await fetch(FILES_DB_URL + '/' + fileId + '.json', { method: 'DELETE' });
+    loadFilesList();
+  } catch(e) { alert('❌ خطأ في الحذف'); }
+}
+
 // ============ INIT ============
 let _appStarted = false;
 async function startApp() {
@@ -2479,3 +2740,37 @@ window.addEventListener('load', () => setTimeout(startApp, 200));
 </script>
 </body>
 </html>
+
+  <!-- FILES / DATA REPOSITORY TAB -->
+  <div class="tab-panel" id="tab-files">
+    <!-- Upload Section -->
+    <div class="table-card" style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div class="table-title" style="margin:0;"><span>🗄️</span> مستودع ملفات البيانات</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <label style="background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;padding:10px 20px;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;">
+            📤 رفع ملف إكسيل جديد
+            <input type="file" id="file-repo-input" accept=".xlsx,.xls" style="display:none;" onchange="uploadFileToRepo(this)">
+          </label>
+          <button onclick="loadFilesList()" style="background:#f0f4fb;color:#374151;border:none;padding:10px 16px;border-radius:12px;font-family:Cairo,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">🔄 تحديث</button>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">ارفع ملفات الإكسيل هنا — تُخزّن في السحابة ومتاحة لكل الأدمن. اختر الملف النشط ليظهر في الداشبورد لجميع المستخدمين.</p>
+      <!-- Upload Progress -->
+      <div id="file-upload-progress" style="display:none;background:#f0f4fb;border-radius:12px;padding:14px 18px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span id="file-upload-label" style="font-size:13px;font-weight:600;color:#374151;">⏳ جاري الرفع...</span>
+          <span id="file-upload-pct" style="font-size:12px;color:#6b7280;">0%</span>
+        </div>
+        <div style="background:#e5e7eb;border-radius:8px;height:8px;">
+          <div id="file-upload-bar" style="background:linear-gradient(90deg,#1a4db5,#10b981);border-radius:8px;height:8px;width:0%;transition:width .3s;"></div>
+        </div>
+      </div>
+      <!-- Files List -->
+      <div id="files-repo-list" style="display:grid;gap:12px;">
+        <div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">🔄 جاري تحميل الملفات...</div>
+      </div>
+    </div>
+  </div>
+
+
