@@ -2331,16 +2331,24 @@ function showSyncStatus(msg, color='#10b981') {
 }
 
 // Write to Firebase + localStorage
+const FB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab';
+
 async function sharedSet(key, value) {
   const str = typeof value === 'string' ? value : JSON.stringify(value);
   localStorage.setItem(key, str);
-  const db = getDB();
-  if (!db) return;
   try {
     const safeKey = key.replace(/[.#$\[\]]/g, '_');
-    await db.ref('sahab/' + safeKey).set({ v: str, t: Date.now() });
+    const res = await fetch(FB_URL + '/' + safeKey + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ v: str, t: Date.now() })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     showSyncStatus('☁️ محفوظ', '#10b981');
-  } catch(e) { console.warn('Firebase write error:', e); showSyncStatus('⚠️ خطأ في الحفظ', '#ef4444'); }
+  } catch(e) {
+    console.warn('Firebase write error:', e);
+    showSyncStatus('⚠️ خطأ في الحفظ', '#ef4444');
+  }
 }
 
 // Read from Firebase (fallback to localStorage)
@@ -2365,33 +2373,37 @@ const SHARED_KEYS = ['st_data','st_data_meta','st_settings','st_discount',
 // Note: st_users is NOT shared via Firebase (managed locally per install)
 
 async function syncFromShared() {
-  const db = getDB();
-  if (!db) { console.warn('Firebase not available, using localStorage'); return; }
   showSyncStatus('🔄 جاري المزامنة...', '#f59e0b');
   try {
-    const snap = await db.ref('sahab').once('value');
-    if (snap.exists()) {
-      const data = snap.val();
+    const res = await fetch(FB_URL + '.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    if (data) {
+      let updated = false;
       for (const key of SHARED_KEYS) {
         const safeKey = key.replace(/[.#$\[\]]/g, '_');
         if (data[safeKey] && data[safeKey].v) {
           localStorage.setItem(key, data[safeKey].v);
+          updated = true;
         }
       }
-      // ── تحديث RAW_DATA من البيانات الجديدة ──
-      try {
-        const saved = localStorage.getItem('st_data');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            RAW_DATA = parsed;
+      // ── تحديث RAW_DATA ──
+      if (updated) {
+        try {
+          const saved = localStorage.getItem('st_data');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              RAW_DATA = parsed;
+              console.log('[Firebase] RAW_DATA updated:', parsed.length, 'records');
+            }
           }
-        }
-      } catch(e) { console.warn('RAW_DATA update error:', e); }
-      showSyncStatus('✅ تمت المزامنة', '#10b981');
+        } catch(e) { console.warn('RAW_DATA parse error:', e); }
+      }
+      showSyncStatus('✅ ' + RAW_DATA.length + ' سجل', '#10b981');
     } else {
-      showSyncStatus('📭 قاعدة بيانات فارغة — جاري الرفع...', '#6b7280');
-      // Push local data to Firebase on first run
+      showSyncStatus('📭 فارغ — جاري الرفع...', '#6b7280');
       await pushLocalToFirebase();
     }
   } catch(e) {
@@ -2402,49 +2414,35 @@ async function syncFromShared() {
 
 // Push all local data to Firebase (first-time setup)
 async function pushLocalToFirebase() {
-  const db = getDB();
-  if (!db) return;
   for (const key of SHARED_KEYS) {
     const val = localStorage.getItem(key);
-    if (val) {
-      const safeKey = key.replace(/[.#$\[\]]/g, '_');
-      try { await db.ref('sahab/' + safeKey).set({ v: val, t: Date.now() }); } catch(e) {}
-    }
+    if (val) await sharedSet(key, val);
   }
   showSyncStatus('☁️ تم رفع البيانات', '#10b981');
 }
 
 // Listen for real-time changes (auto-refresh data when admin uploads)
 function listenForChanges() {
-  const db = getDB();
-  if (!db) return;
-  db.ref('sahab/st_data_meta').on('value', snap => {
-    if (!snap.exists()) return;
-    const newMeta = snap.val().v;
-    const localMeta = localStorage.getItem('st_data_meta');
-    if (newMeta && newMeta !== localMeta) {
-      // New data uploaded by admin — sync only data keys (NOT users/session)
-      const dataKeys = ['st_data','st_data_meta','st_settings','st_discount','st_cash_rules','st_cash_disc','st_update_meta'];
-      Promise.all(dataKeys.map(k => {
-        const sk = k.replace(/[.#$\[\]]/g,'_');
-        return db.ref('sahab/'+sk).once('value').then(s => {
-          if (s.exists()) localStorage.setItem(k, s.val().v);
-        });
-      })).then(() => {
-        // تحديث RAW_DATA من localStorage الجديد
-        try {
-          const saved = localStorage.getItem('st_data');
-          if (saved) { const p = JSON.parse(saved); if (Array.isArray(p) && p.length > 0) RAW_DATA = p; }
-        } catch(e) {}
+  // Poll Firebase every 30 seconds for changes
+  setInterval(async () => {
+    try {
+      const res = await fetch(FB_URL + '/st_update_meta.json');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data || !data.v) return;
+      const newMeta = data.v;
+      const localMeta = localStorage.getItem('st_update_meta');
+      if (newMeta !== localMeta) {
+        console.log('[Firebase] New data detected, syncing...');
+        await syncFromShared();
         loadSavedSettings();
-        loadExcelFromStorage();
         loadCashSettings();
         renderAll();
         const badge = document.getElementById('sync-alert');
-        if (badge) { badge.style.display='flex'; setTimeout(()=>{badge.style.display='none';},4000); }
-      });
-    }
-  });
+        if (badge) { badge.style.display='flex'; setTimeout(()=>{ badge.style.display='none'; },4000); }
+      }
+    } catch(e) { console.warn('Poll error:', e); }
+  }, 30000);
 }
 
 function loadExcelFromStorage() {
