@@ -1082,8 +1082,6 @@
     </div>
   </div>
 
-</div>
-
 <script>
 // ============ AUTH SYSTEM WITH LOCALSTORAGE ============
 // ============ PERMISSIONS SYSTEM ============
@@ -2646,7 +2644,7 @@ async function loadFilesList() {
       return;
     }
 
-    container.innerHTML = files.forEach(f => {
+    container.innerHTML = ''; files.forEach(f => {
       const isActive = f.id === activeId;
       const date = new Date(f.uploadedAt).toLocaleDateString('ar-SA', { dateStyle: 'medium' });
 
