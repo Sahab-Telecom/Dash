@@ -712,7 +712,7 @@
     </label>
     <button class="login-btn" onclick="doLogin()">🔐 تسجيل الدخول</button>
     <div class="login-error" id="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
-    <div class="login-version" id="login-ver-text">Sahab Dashboard v2.0</div>
+    <div class="login-version" id="login-ver-text">Sahab Dashboard v2.3</div>
   </div>
 </div>
 
@@ -1127,23 +1127,26 @@ const ROLE_CLASSES = { admin: 'role-admin', supervisor: 'role-supervisor', staff
 
 function checkSession() {
   const saved = localStorage.getItem('st_user');
-  if (saved) {
-    try {
-      const parsedUser = JSON.parse(saved);
-      // Refresh from current USERS list (case-insensitive)
-      const fresh = USERS.find(u => u.username.toLowerCase() === parsedUser.username.toLowerCase());
-      currentUser = fresh || parsedUser;
-      // Ensure pages/actions are set
-      if (!currentUser.pages)   currentUser.pages   = defaultPerms(currentUser.role).pages;
-      if (!currentUser.actions) currentUser.actions = defaultPerms(currentUser.role).actions;
-      showDashboard();
-    } catch(e) {
-      console.warn('Session restore failed:', e);
-      localStorage.removeItem('st_user');
-      showLogin();
+  if (!saved) { showLogin(); return; }
+  try {
+    const parsedUser = JSON.parse(saved);
+    if (!parsedUser || !parsedUser.username) { showLogin(); return; }
+    // Always lookup fresh user from USERS list (case-insensitive)
+    const fresh = USERS.find(u => u.username.toLowerCase() === parsedUser.username.toLowerCase());
+    if (!fresh) {
+      // User not found in current list — keep saved data as fallback
+      currentUser = parsedUser;
+    } else {
+      currentUser = fresh;
     }
-  } else {
+    // Ensure pages/actions always set
+    if (!currentUser.pages)   currentUser.pages   = defaultPerms(currentUser.role).pages;
+    if (!currentUser.actions) currentUser.actions = defaultPerms(currentUser.role).actions;
+    showDashboard();
+  } catch(e) {
+    console.warn('Session restore failed:', e);
     showLogin();
+    // Don't clear st_user on error — might be temporary
   }
 }
 
@@ -1159,10 +1162,11 @@ function showLogin() {
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
-  const found = USERS.find(x => x.username === u && x.password === p);
+  const found = USERS.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
   if (found) {
     currentUser = found;
-    localStorage.setItem('st_user', JSON.stringify(found));
+    // Save only username for session persistence
+    localStorage.setItem('st_user', JSON.stringify({ username: found.username, role: found.role }));
     document.getElementById('login-error').style.display = 'none';
     document.getElementById('login-overlay').style.display = 'none';
     document.body.classList.remove('login-open');
@@ -2057,14 +2061,14 @@ async function loadExcel(event) {
 // ============ VERSION SYSTEM ============
 function getVersionStr() {
   try {
-    const v = JSON.parse(localStorage.getItem('st_version') || '{"major":2,"minor":0}');
+    const v = JSON.parse(localStorage.getItem('st_version') || '{"major":2,"minor":3}');
     return 'v' + v.major + '.' + v.minor;
   } catch(e) { return 'v2.0'; }
 }
 
 function incVersion() {
   try {
-    const v = JSON.parse(localStorage.getItem('st_version') || '{"major":2,"minor":0}');
+    const v = JSON.parse(localStorage.getItem('st_version') || '{"major":2,"minor":3}');
     v.minor = (v.minor || 0) + 1;
     localStorage.setItem('st_version', JSON.stringify(v));
     const el = document.getElementById('login-ver-text');
