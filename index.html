@@ -1136,6 +1136,7 @@ function checkSession() {
     // Lookup user case-insensitive
     const fresh = USERS.find(u => u.username.toLowerCase() === parsedUser.username.toLowerCase());
     currentUser = fresh || parsedUser;
+    console.log('[Session] User:', currentUser.username, '| RAW_DATA size:', RAW_DATA.length);
     if (!currentUser.pages)   currentUser.pages   = defaultPerms(currentUser.role).pages;
     if (!currentUser.actions) currentUser.actions = defaultPerms(currentUser.role).actions;
     showDashboard();
@@ -1202,12 +1203,7 @@ function showDashboard() {
   const role = currentUser.role;
 
   // ── Data filter by location ──
-  // تحديث RAW_DATA من localStorage أولاً
-  try {
-    const saved = localStorage.getItem('st_data');
-    if (saved) { const p = JSON.parse(saved); if (Array.isArray(p) && p.length > 0) RAW_DATA = p; }
-  } catch(e) {}
-  
+  // RAW_DATA محدثة من syncFromShared — استخدامها مباشرة
   if (role === 'staff' && currentUser.location) {
     currentData = RAW_DATA.filter(d => d.Location === currentUser.location);
   } else {
@@ -2382,6 +2378,16 @@ async function syncFromShared() {
           localStorage.setItem(key, data[safeKey].v);
         }
       }
+      // ── تحديث RAW_DATA من البيانات الجديدة ──
+      try {
+        const saved = localStorage.getItem('st_data');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            RAW_DATA = parsed;
+          }
+        }
+      } catch(e) { console.warn('RAW_DATA update error:', e); }
       showSyncStatus('✅ تمت المزامنة', '#10b981');
     } else {
       showSyncStatus('📭 قاعدة بيانات فارغة — جاري الرفع...', '#6b7280');
