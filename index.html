@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Sahab Telecom - لوحة المبيعات</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -724,6 +727,8 @@
       </div>
     </div>
     <div class="header-date" id="header-date">Modern Trade · مايو 2026</div>
+    <div id="sync-status" style="background:rgba(255,255,255,0.15);padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;display:none;color:white;"></div>
+    <div id="sync-alert" style="display:none;background:#f59e0b;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;color:white;align-items:center;gap:6px;">🔄 بيانات جديدة متاحة — تم التحديث</div>
     <div id="data-date-badge" style="background:rgba(255,255,255,0.13);padding:6px 14px;border-radius:20px;color:white;font-size:11px;display:none;align-items:center;gap:6px;">
       📊 آخر بيانات: <span id="data-date-text">-</span>
     </div>
@@ -1111,7 +1116,7 @@ function loadUsers() {
 }
 
 function saveUsers() {
-  localStorage.setItem('st_users', JSON.stringify(USERS));
+  localStorage.setItem('st_users', JSON.stringify(USERS)); sharedSet('st_users', JSON.stringify(USERS));
 }
 
 let USERS = loadUsers();
@@ -1846,7 +1851,7 @@ function saveSettings() {
   alert('✅ تم حفظ الإعدادات! لا تنسى الضغط على زر الحفظ الأخضر.');
 }
 
-function loadExcel(event) {
+async function loadExcel(event) {
   if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
   const file = event.target.files[0];
   if (!file) return;
@@ -1893,12 +1898,13 @@ function saveAll() {
   // Save settings to localStorage
   localStorage.setItem('st_settings', JSON.stringify(settings));
   localStorage.setItem('st_discount', discountPct.toString());
+  sharedSet('st_settings', JSON.stringify(settings)); sharedSet('st_discount', discountPct.toString());
   // Record update meta
   const meta = {
     by: currentUser?.username || 'admin',
     at: new Date().toLocaleString('ar-SA', { dateStyle:'short', timeStyle:'short' })
   };
-  localStorage.setItem('st_update_meta', JSON.stringify(meta));
+  localStorage.setItem('st_update_meta', JSON.stringify(meta)); sharedSet('st_update_meta', JSON.stringify(meta));
   updateLastUpdateBadge();
   hasUnsaved = false;
   const btn = document.getElementById('float-save');
@@ -1991,7 +1997,7 @@ function updateStatusBar() {
   }
 }
 
-function loadExcel(event) {
+async function loadExcel(event) {
   if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
   const file = event.target.files[0];
   if (!file) return;
@@ -2140,6 +2146,7 @@ function saveCashSettings() {
   cashDiscount = parseFloat(document.getElementById('cash-discount-pct')?.value || 0);
   localStorage.setItem('st_cash_rules', JSON.stringify(cashRules));
   localStorage.setItem('st_cash_disc', cashDiscount.toString());
+  sharedSet('st_cash_rules', JSON.stringify(cashRules)); sharedSet('st_cash_disc', cashDiscount.toString());
   incVersion();
   renderCashTab();
   markUnsaved();
@@ -2205,8 +2212,122 @@ function renderCashTab() {
   }).join('');
 }
 
+
+// ============ FIREBASE REALTIME DATABASE ============
+const firebaseConfig = {
+  apiKey: "AIzaSyB1HUl2PuO8sMVpHtOqolGUyTvIlLIhGcg",
+  authDomain: "sahab-telecom.firebaseapp.com",
+  databaseURL: "https://sahab-telecom-default-rtdb.firebaseio.com",
+  projectId: "sahab-telecom",
+  storageBucket: "sahab-telecom.firebasestorage.app",
+  messagingSenderId: "916467386151",
+  appId: "1:916467386151:web:977ea97d69582cab920b02"
+};
+
+let _db = null;
+function getDB() {
+  if (_db) return _db;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    else firebase.app();
+    _db = firebase.database();
+  } catch(e) { console.warn('Firebase init error:', e); }
+  return _db;
+}
+
+// Show sync status in header
+function showSyncStatus(msg, color='#10b981') {
+  let el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = 'inline';
+  if (color === '#10b981') setTimeout(() => { if(el) el.style.display='none'; }, 3000);
+}
+
+// Write to Firebase + localStorage
+async function sharedSet(key, value) {
+  const str = typeof value === 'string' ? value : JSON.stringify(value);
+  localStorage.setItem(key, str);
+  const db = getDB();
+  if (!db) return;
+  try {
+    const safeKey = key.replace(/[.#$\[\]]/g, '_');
+    await db.ref('sahab/' + safeKey).set({ v: str, t: Date.now() });
+    showSyncStatus('☁️ محفوظ', '#10b981');
+  } catch(e) { console.warn('Firebase write error:', e); showSyncStatus('⚠️ خطأ في الحفظ', '#ef4444'); }
+}
+
+// Read from Firebase (fallback to localStorage)
+async function sharedGet(key) {
+  const db = getDB();
+  if (!db) return localStorage.getItem(key);
+  try {
+    const safeKey = key.replace(/[.#$\[\]]/g, '_');
+    const snap = await db.ref('sahab/' + safeKey).once('value');
+    if (snap.exists()) {
+      const val = snap.val().v;
+      localStorage.setItem(key, val); // cache locally
+      return val;
+    }
+  } catch(e) { console.warn('Firebase read error:', e); }
+  return localStorage.getItem(key);
+}
+
+// Sync ALL shared keys from Firebase on startup
+const SHARED_KEYS = ['st_data','st_data_meta','st_settings','st_discount',
+                     'st_cash_rules','st_cash_disc','st_users','st_update_meta'];
+
+async function syncFromShared() {
+  const db = getDB();
+  if (!db) { console.warn('Firebase not available, using localStorage'); return; }
+  showSyncStatus('🔄 جاري المزامنة...', '#f59e0b');
+  try {
+    const snap = await db.ref('sahab').once('value');
+    if (snap.exists()) {
+      const data = snap.val();
+      for (const key of SHARED_KEYS) {
+        const safeKey = key.replace(/[.#$\[\]]/g, '_');
+        if (data[safeKey] && data[safeKey].v) {
+          localStorage.setItem(key, data[safeKey].v);
+        }
+      }
+      showSyncStatus('✅ تمت المزامنة', '#10b981');
+    } else {
+      showSyncStatus('📭 قاعدة بيانات فارغة', '#6b7280');
+    }
+  } catch(e) {
+    console.warn('Firebase sync error:', e);
+    showSyncStatus('⚠️ تعذرت المزامنة', '#ef4444');
+  }
+}
+
+// Listen for real-time changes (auto-refresh data when admin uploads)
+function listenForChanges() {
+  const db = getDB();
+  if (!db) return;
+  db.ref('sahab/st_data_meta').on('value', snap => {
+    if (!snap.exists()) return;
+    const newMeta = snap.val().v;
+    const localMeta = localStorage.getItem('st_data_meta');
+    if (newMeta !== localMeta) {
+      // New data uploaded by admin — reload all data
+      syncFromShared().then(() => {
+        loadSavedSettings();
+        loadExcelFromStorage();
+        loadCashSettings();
+        const badge = document.getElementById('sync-alert');
+        if (badge) {
+          badge.style.display = 'flex';
+          setTimeout(() => { badge.style.display='none'; }, 5000);
+        }
+      });
+    }
+  });
+}
+
 // ============ INIT ============
-checkSession();
+syncFromShared().then(() => { checkSession(); listenForChanges(); });
 </script>
 </body>
 </html>
