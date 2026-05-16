@@ -737,6 +737,12 @@
       <div class="dot"></div>
       <span id="last-update-text">-</span>
     </div>
+    <button id="btn-refresh-data" onclick="refreshDataNow()" title="تحديث البيانات من السحابة"
+      style="background:rgba(255,255,255,0.12);border:none;color:white;padding:8px 14px;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:background .2s;"
+      onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      <span id="refresh-icon" style="font-size:16px;display:inline-block;transition:transform .4s;">🔄</span>
+      <span id="refresh-label">تحديث</span>
+    </button>
     <div class="user-badge" onclick="logout()" title="اضغط لتسجيل الخروج">
       <div>
         <div class="user-badge-name" id="hdr-username">-</div>
@@ -2774,6 +2780,53 @@ async function deleteFile(fileId) {
     await fetch(FILES_DB_URL + '/' + fileId + '.json', { method: 'DELETE' });
     loadFilesList();
   } catch(e) { alert('❌ خطأ في الحذف'); }
+}
+
+// ============ MANUAL REFRESH ============
+async function refreshDataNow() {
+  const icon  = document.getElementById('refresh-icon');
+  const label = document.getElementById('refresh-label');
+  if (!icon || !label) return;
+
+  // Spin animation
+  icon.style.transform = 'rotate(360deg)';
+  label.textContent = 'جاري التحديث...';
+  document.getElementById('btn-refresh-data').disabled = true;
+
+  try {
+    await syncFromShared();
+
+    // Update UI with new data
+    loadSavedSettings();
+    loadCashSettings();
+
+    // Reload data based on role
+    const role = currentUser?.role;
+    if (role === 'staff' && currentUser?.location) {
+      currentData = RAW_DATA.filter(d => d.Location === currentUser.location);
+    } else {
+      currentData = RAW_DATA.filter(d => d.STAFF_NO && d.Location);
+    }
+
+    filteredData = null; // clear date filter
+    renderAll();
+    updateDataDateBadge(currentData);
+    updateLastUpdateBadge();
+
+    // Success feedback
+    icon.style.transform = 'rotate(0deg)';
+    label.textContent = 'تم التحديث ✓';
+    showSyncStatus('تم التحديث · ' + RAW_DATA.length + ' سجل', '#10b981');
+    setTimeout(() => { label.textContent = 'تحديث'; }, 2500);
+
+  } catch(e) {
+    icon.style.transform = 'rotate(0deg)';
+    label.textContent = 'خطأ في التحديث';
+    setTimeout(() => { label.textContent = 'تحديث'; }, 2500);
+  } finally {
+    document.getElementById('btn-refresh-data').disabled = false;
+    setTimeout(() => { icon.style.transition = 'none'; icon.style.transform = 'rotate(0deg)'; setTimeout(() => { icon.style.transition = 'transform .4s'; }, 50); }, 500);
+  }
 }
 
 // ============ INIT ============
