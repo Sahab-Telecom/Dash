@@ -1087,17 +1087,17 @@
 // ============ PERMISSIONS SYSTEM ============
 // pages: which tabs are visible
 // actions: what the user can DO inside those tabs
-const ALL_PAGES   = ['overview','locations','staff','commissions','cash','settings','users'];
-const ALL_ACTIONS = ['upload_excel','edit_settings','apply_discount','edit_cash','manage_users'];
+const ALL_PAGES   = ['overview','locations','staff','commissions','cash','settings','users','files'];
+const ALL_ACTIONS = ['upload_excel','edit_settings','apply_discount','edit_cash','manage_users','download_file'];
 
 // Default permission templates (used when creating new users)
-const PERM_FULL    = { pages: ALL_PAGES,                                      actions: ALL_ACTIONS };
+const PERM_FULL    = { pages: ALL_PAGES, actions: ALL_ACTIONS };
 const PERM_VIEW    = { pages: ['overview','locations','staff','commissions','cash'], actions: [] };
 const PERM_SALES   = { pages: ['overview','locations','staff'],               actions: [] };
 const PERM_MINIMAL = { pages: ['overview','staff'],                           actions: [] };
 
 function defaultPerms(role) {
-  if (role === 'admin') return { pages: [...ALL_PAGES], actions: [...ALL_ACTIONS] };
+  if (role === 'admin') return { pages: [...ALL_PAGES], actions: [...ALL_ACTIONS] }; // includes files
   if (role === 'supervisor') return { pages: ['overview','locations','staff'], actions: [] };
   return { pages: ['overview','staff'], actions: [] };
 }
@@ -1137,7 +1137,7 @@ function loadUsers() {
             if (!merged[existing].actions) merged[existing].actions = defaultPerms(merged[existing].role).actions;
           }
         } else {
-          if (!su.pages) su.pages = su.role === 'admin' ? ADMIN_PAGES : SUPER_PAGES;
+          if (!su.pages) su.pages = defaultPerms(su.role).pages;
           merged.push(su);
         }
       }
@@ -1258,7 +1258,7 @@ function showDashboard() {
   // Tab icon → page key mapping
   const TAB_MAP = {
     'نظرة عامة':'overview', 'الفروع':'locations', 'الموظف':'staff',
-    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users'
+    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users', 'مستودع':'files'
   };
 
   // Show/hide each tab based on this user's pages list
@@ -1278,8 +1278,9 @@ function showDashboard() {
   updateLastUpdateBadge();
   const cashBtn = document.getElementById('tab-btn-cash');
   if (cashBtn) cashBtn.style.display = (currentUser?.role === 'admin' || currentUser?.role === 'supervisor') ? '' : 'none';
+  // files tab: based on page permission
   const filesBtn = document.getElementById('tab-btn-files');
-  if (filesBtn) filesBtn.style.display = (currentUser?.role === 'admin') ? '' : 'none';
+  if (filesBtn) filesBtn.style.display = uPages.includes('files') ? '' : 'none';
   // تحميل البيانات المحفوظة من localStorage (محدّثة من الأدمن)
   const savedData = loadDataFromStorage();
   if (savedData) {
@@ -1291,8 +1292,8 @@ function showDashboard() {
   updateStatusBar();
 }
 
-const PAGE_NAMES   = { overview:'📊 نظرة عامة', locations:'📍 الفروع', staff:'👤 الموظفون', commissions:'💰 العمولات', cash:'💵 الكاش', settings:'⚙️ الإعدادات', users:'👥 المستخدمون' };
-const ACTION_NAMES = { upload_excel:'⬆️ رفع إكسيل', edit_settings:'⚙️ تعديل الإعدادات', apply_discount:'✂️ الخصم', edit_cash:'💵 تعديل الكاش', manage_users:'👥 إدارة المستخدمين' };
+const PAGE_NAMES   = { overview:'📊 نظرة عامة', locations:'📍 الفروع', staff:'👤 الموظفون', commissions:'💰 العمولات', cash:'💵 الكاش', settings:'⚙️ الإعدادات', users:'👥 المستخدمون', files:'🗄️ مستودع البيانات' };
+const ACTION_NAMES = { upload_excel:'⬆️ رفع إكسيل', edit_settings:'⚙️ تعديل الإعدادات', apply_discount:'✂️ الخصم', edit_cash:'💵 تعديل الكاش', manage_users:'👥 إدارة المستخدمين', download_file:'⬇️ تحميل ملف' };
 
 function renderUsersTable() {
   if (!(currentUser?.pages || []).includes('users')) return;
@@ -2493,6 +2494,12 @@ async function uploadFileToRepo(input) {
   const file = input.files[0];
   if (!file) return;
   input.value = '';
+  
+  // Check if running from file:// (won't work with Firebase)
+  if (window.location.protocol === 'file:') {
+    alert('لا يمكن رفع الملفات عند فتح الداشبورد من الجهاز مباشرة.\nالرجاء فتح الداشبورد من الرابط:\nhttps://sahab-telecom.github.io/Dash/');
+    return;
+  }
 
   const progress = document.getElementById('file-upload-progress');
   const label    = document.getElementById('file-upload-label');
@@ -2652,6 +2659,17 @@ async function loadFilesList() {
         btns.appendChild(ab);
       }
 
+      // Download button
+      const canDownload = (currentUser?.actions || []).includes('download_file');
+      if (canDownload) {
+        const dlBtn = document.createElement('button');
+        dlBtn.style.cssText = 'background:#dbeafe;color:#1e40af;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:600;';
+        dlBtn.textContent = 'تحميل';
+        const fidDl = f.id;
+        dlBtn.onclick = function() { downloadFile(fidDl, f.name); };
+        btns.appendChild(dlBtn);
+      }
+
       const db = document.createElement('button');
       db.style.cssText = 'background:#fee2e2;color:#b91c1c;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;';
       db.textContent = 'حذف';
@@ -2730,6 +2748,24 @@ async function activateFile(fileId, btn) {
     alert('خطأ: ' + e.message);
     if (btn) { btn.textContent = origText; btn.disabled = false; }
   }
+}
+
+async function downloadFile(fileId, fileName) {
+  try {
+    const res = await fetch(FILES_DB_URL + '/' + fileId + '/data.json');
+    const obj = await res.json();
+    if (!obj || !obj.v) { alert('فشل تحميل البيانات'); return; }
+    const data = JSON.parse(obj.v);
+    // Convert back to CSV for download
+    if (!data.length) { alert('لا توجد بيانات'); return; }
+    const keys = Object.keys(data[0]);
+    const csv = [keys.join(','), ...data.map(r => keys.map(k => JSON.stringify(r[k] ?? '')).join(','))].join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName.replace('.xlsx', '.csv');
+    a.click(); URL.revokeObjectURL(url);
+  } catch(e) { alert('خطأ في التحميل: ' + e.message); }
 }
 
 async function deleteFile(fileId) {
