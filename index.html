@@ -2557,46 +2557,17 @@ async function uploadFileToRepo(input) {
       storagePath: 'excel_files/' + fileId + '.json'
     };
 
-    // ── 4. رفع ملف الإكسيل لـ Firebase Storage ──
-    setProgress(40, 'جاري رفع الملف لـ Storage...');
+    // ── 4. رفع البيانات لـ Firebase Realtime Database ──
+    setProgress(40, 'جاري رفع البيانات...');
 
-    let storageOk = false;
-    try {
-      if (typeof firebase !== 'undefined' && firebase.apps.length) {
-        const storage   = firebase.storage();
-        const storageRef = storage.ref(fileInfo.storagePath);
-        const dataBlob  = new Blob([JSON.stringify(data)], { type: 'application/json' });
-
-        // رفع مع تتبع التقدم
-        await new Promise((resolve, reject) => {
-          const task = storageRef.put(dataBlob);
-          task.on('state_changed',
-            snap => {
-              const p = Math.round(40 + (snap.bytesTransferred / snap.totalBytes) * 45);
-              setProgress(p, 'جاري رفع الملف... ' + p + '%');
-            },
-            reject,
-            resolve
-          );
-        });
-        storageOk = true;
-        fileInfo.downloadURL = await storageRef.getDownloadURL();
-      }
-    } catch(storErr) {
-      console.warn('Storage upload failed, using REST:', storErr);
-    }
-
-    // fallback: رفع كـ JSON مباشر في Realtime Database لو Storage فشل
-    if (!storageOk) {
-      setProgress(70, 'جاري حفظ البيانات...');
-      const res = await fetch(FILES_DB_URL + '/' + fileId + '/data.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ v: JSON.stringify(data), t: Date.now() })
-      });
-      if (!res.ok) throw new Error('فشل الرفع: ' + res.status);
-      fileInfo.storedInRTDB = true;
-    }
+    const uploadRes = await fetch(FILES_DB_URL + '/' + fileId + '/data.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ v: JSON.stringify(data), t: Date.now() })
+    });
+    if (!uploadRes.ok) throw new Error('فشل الرفع: ' + uploadRes.status);
+    fileInfo.storedInRTDB = true;
+    setProgress(80, 'تم رفع البيانات...');
 
     // ── 5. حفظ معلومات الملف في Realtime Database ──
     setProgress(92, 'جاري حفظ معلومات الملف...');
