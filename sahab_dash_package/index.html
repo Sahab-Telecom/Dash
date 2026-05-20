@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sahab Telecom - اختيار الشركة</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+:root{--blue-deep:#0d2666;--blue-mid:#1a4db5;--blue-light:#3a7bd5;--gray-bg:#f0f4fb;--green:#10b981;--red:#ef4444;--shadow:0 10px 35px rgba(13,38,102,.18)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo',sans-serif;background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid),var(--blue-light));min-height:100vh;color:var(--blue-deep);display:flex;align-items:center;justify-content:center;padding:24px}.card{width:100%;max-width:520px;background:#fff;border-radius:28px;box-shadow:0 28px 90px rgba(0,0,0,.28);overflow:hidden}.top{padding:30px 28px 22px;text-align:center;background:linear-gradient(180deg,#fff,#f7faff)}.logo{width:86px;height:86px;border-radius:50%;margin:0 auto 14px;background:#fff;border:3px solid #e8eef8;box-shadow:0 8px 24px rgba(13,38,102,.17);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900}.top h1{font-size:22px;font-weight:900}.top p{font-size:13px;color:#6b7280;margin-top:4px}.body{padding:28px}.field{margin-bottom:15px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:#374151}.field input{width:100%;border:2px solid #e5e7eb;border-radius:14px;padding:13px 15px;font-family:'Cairo';font-size:15px;direction:ltr;text-align:left;background:#f9fafb}.field input:focus{outline:none;border-color:var(--blue-mid);background:#fff}.btn{width:100%;border:0;border-radius:14px;padding:14px;font-family:'Cairo';font-size:15px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid));color:#fff;box-shadow:0 8px 20px rgba(13,38,102,.25)}.error{display:none;margin-top:13px;background:#fee2e2;color:#b91c1c;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700;text-align:center}.choice{display:none}.welcome{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:10px}.welcome strong{font-size:16px}.logout{border:0;background:#eef2ff;color:#1a4db5;border-radius:12px;padding:8px 12px;font-family:'Cairo';font-weight:800;cursor:pointer}.company-grid{display:grid;grid-template-columns:1fr;gap:14px}.company{border:2px solid #e5e7eb;border-radius:20px;padding:20px;cursor:pointer;background:#fff;display:flex;align-items:center;gap:16px;transition:.18s;text-align:right}.company:hover{transform:translateY(-2px);border-color:var(--blue-light);box-shadow:var(--shadow)}.company .icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 52px}.red .icon{background:#fee2e2}.purple .icon{background:#f3e8ff}.company h3{font-size:17px;font-weight:900}.company p{font-size:12px;color:#6b7280;margin-top:2px}.note{margin-top:16px;font-size:12px;color:#6b7280;text-align:center}.version{font-size:11px;color:#9ca3af;text-align:center;margin-top:18px}@media(max-width:520px){.body{padding:22px}.top{padding:24px 20px 16px}.top h1{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <div class="logo">س</div>
+    <h1>Sahab Telecom Dashboard</h1>
+    <p>تسجيل الدخول ثم اختيار الشركة</p>
+  </div>
+  <div class="body">
+    <section id="loginSection">
+      <div class="field"><label>اسم المستخدم</label><input id="username" autocomplete="username"></div>
+      <div class="field"><label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password"></div>
+      <button class="btn" onclick="login()">دخول</button>
+      <div id="error" class="error">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+      <div class="version">Portal v1.0</div>
+    </section>
+    <section id="choiceSection" class="choice">
+      <div class="welcome"><strong>اختر الشركة</strong><button class="logout" onclick="logout()">تسجيل خروج</button></div>
+      <div class="company-grid">
+        <button class="company red" onclick="openCompany('redbull')">
+          <div class="icon">🔴</div><div><h3>Red Bull Mobile</h3><p>فتح لوحة ريدبول الحالية كما هي</p></div>
+        </button>
+        <button class="company purple" onclick="openCompany('virgin')">
+          <div class="icon">🟣</div><div><h3>Virgin Mobile</h3><p>لوحة جديدة وفارغة للبناء عليها</p></div>
+        </button>
+      </div>
+      <div class="note">كل شركة مستقلة بصفحتها وبياناتها، بدون خلط بين اللوحات.</div>
+    </section>
+  </div>
+</div>
+<script>
+const DEFAULT_USERS = [
+  { username:'Sahab', password:'Aa@123456', role:'admin' },
+  { username:'BBB', password:'Aa@123456', role:'admin' },
+  { username:'Khalaf', password:'Aa@123456', role:'admin' },
+  { username:'Muhalhel', password:'Aa@123456', role:'admin' },
+  { username:'Ahmed', password:'Aa@123456', role:'admin' },
+  { username:'Super', password:'Aa@123456', role:'supervisor' },
+  { username:'مشرف', password:'Aa@123456', role:'supervisor' },
+  { username:'MT00455', password:'Aa@123456', role:'staff' },
+  { username:'MT00456', password:'Aa@123456', role:'staff' },
+  { username:'MT00457', password:'Aa@123456', role:'staff' },
+  { username:'MT00466', password:'Aa@123456', role:'staff' },
+  { username:'MT00470', password:'Aa@123456', role:'staff' },
+  { username:'MT00471', password:'Aa@123456', role:'staff' },
+  { username:'MT00475', password:'Aa@123456', role:'staff' },
+  { username:'MT00484', password:'Aa@123456', role:'staff' },
+  { username:'MT00436', password:'Aa@123456', role:'staff' }
+];
+function users(){
+  try{ const saved=JSON.parse(localStorage.getItem('st_users')||'null'); if(Array.isArray(saved)&&saved.length) return saved; }catch(e){}
+  return DEFAULT_USERS;
+}
+function showChoice(){document.getElementById('loginSection').style.display='none';document.getElementById('choiceSection').style.display='block'}
+function showLogin(){document.getElementById('loginSection').style.display='block';document.getElementById('choiceSection').style.display='none'}
+function login(){
+  const u=document.getElementById('username').value.trim(); const p=document.getElementById('password').value;
+  const found=users().find(x => String(x.username).toLowerCase()===u.toLowerCase() && x.password===p);
+  if(!found){document.getElementById('error').style.display='block';return}
+  localStorage.setItem('st_user', JSON.stringify({username:found.username, role:found.role || 'admin'}));
+  showChoice();
+}
+function logout(){localStorage.removeItem('st_user');showLogin()}
+function openCompany(company){
+  if(company==='redbull') location.href='redbull/';
+  if(company==='virgin') location.href='virgin/';
+}
+(function init(){
+  try{ const s=JSON.parse(localStorage.getItem('st_user')||'null'); if(s && s.username) return showChoice(); }catch(e){}
+  showLogin();
+})();
+document.addEventListener('keydown', e => { if(e.key==='Enter' && document.getElementById('loginSection').style.display!=='none') login(); });
+</script>
+</body>
+</html>
