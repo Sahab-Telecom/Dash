@@ -803,19 +803,7 @@
 <div class="main">
 
   <!-- UPLOAD BANNER -->
-  <div class="upload-banner">
-    <div class="upload-banner-text">
-      <h3>📁 تحميل ملف جديد</h3>
-      <p>يمكنك تحديث البيانات بأي وقت عبر رفع ملف إكسيل جديد</p>
-    </div>
-    <div class="upload-btn-wrap">
-      <span id="file-status">البيانات المحملة: مايو 2026</span>
-      <label class="btn-upload" for="excel-upload">
-        ⬆️ رفع إكسيل
-        <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display:none" onchange="loadExcel(event)">
-      </label>
-    </div>
-  </div>
+  
 
   <!-- DATE FILTER BAR -->
   <div id="date-filter-bar" style="background:white;border-radius:14px;padding:14px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(13,38,102,0.1);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
@@ -1316,21 +1304,43 @@ function showDashboard() {
   // Tab icon → page key mapping
   const TAB_MAP = {
     'نظرة عامة':'overview', 'الفروع':'locations', 'الموظف':'staff',
-    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users'
+    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users',
+    'مستودع':'files', 'البوستر':'booster'
   };
 
   // Show/hide each tab based on this user's pages list
   document.querySelectorAll('.tab-btn').forEach(b => {
     const txt = b.textContent;
     const key = Object.keys(TAB_MAP).find(k => txt.includes(k));
-    if (key) b.style.display = uPages.includes(TAB_MAP[key]) ? '' : 'none';
+    if (key) {
+      if (key === 'booster') {
+        // Booster only visible when Virgin/Friendi is active
+        b.style.display = (uPages.includes('booster') && activeCompany === 'friendi') ? '' : 'none';
+      } else {
+        b.style.display = uPages.includes(TAB_MAP[key]) ? '' : 'none';
+      }
+    }
   });
 
   // Upload banner
-  document.querySelector('.upload-banner').style.display = window._canUpload ? '' : 'none';
+  const uploadBanner = document.querySelector('.upload-banner'); if(uploadBanner) uploadBanner.style.display = window._canUpload ? '' : 'none';
 
   loadSavedSettings();
   loadCashSettings();
+  // Init company logos + apply theme
+  const rbO2 = document.getElementById('rb-opt-logo');
+  const frO2 = document.getElementById('fri-opt-logo');
+  if (rbO2) rbO2.src = COMPANIES.redbull.logo;
+  if (frO2) frO2.src = COMPANIES.friendi.logo;
+  // Load company-specific data
+  const cmpData = localStorage.getItem('st_data_' + activeCompany) || localStorage.getItem('st_data');
+  if (cmpData) {
+    try {
+      const cp = JSON.parse(cmpData);
+      if (Array.isArray(cp) && cp.length > 0) { RAW_DATA = cp; }
+    } catch(e) {}
+  }
+  applyCompanyTheme(activeCompany);
   renderAll();
   renderUsersTable();
   updateLastUpdateBadge();
@@ -1581,6 +1591,7 @@ function getLocStats() {
     const rev2 = (r.REV2 || 0) * (1 - discountPct / 100);
     map[r.Location].rev2 += rev2;
     map[r.Location].commProd += rev2 * getCommRate(r.Addon_Value || 0);  // rate from Addon_Value lookup
+    if (r.FPE !== undefined) map[r.Location].fpe = (map[r.Location].fpe || 0) + (r.FPE || 0);
   }
   return Object.values(map).sort((a, b) => b.rev2 - a.rev2);
 }
@@ -1928,6 +1939,8 @@ function switchTab(name) {
   if (name === 'overview') renderCharts(getLocStats());
   if (name === 'users') renderUsersTable();
   if (name === 'cash') { renderCashRulesInputs(); renderCashTab(); }
+  if (name === 'files') { loadFilesList(); }
+  if (name === 'booster') { loadBoosterData().then(() => renderBoosterTab()); }
 }
 
 function applyDiscount() {
@@ -2462,22 +2475,68 @@ const COMPANIES = {
 
 let activeCompany = localStorage.getItem('st_active_company') || 'redbull';
 
-function switchCompany(id) {
+async function switchCompany(id) {
   if (!COMPANIES[id]) return;
   const userCos = currentUser?.companies || ['redbull','friendi'];
   if (!userCos.includes(id)) { alert('ليس لديك صلاحية الوصول لهذه الشركة'); return; }
+
   activeCompany = id;
   localStorage.setItem('st_active_company', id);
-  const companyData = localStorage.getItem('st_data_' + id);
-  if (companyData) {
-    try {
-      const p = JSON.parse(companyData);
-      if (Array.isArray(p) && p.length > 0) { RAW_DATA = p; currentData = p.filter(d => d.STAFF_NO && d.Location); }
-    } catch(e) {}
-  }
-  applyCompanyTheme(id);
   document.getElementById('company-dropdown').style.display = 'none';
-  renderAll(); updateDataDateBadge(currentData);
+  applyCompanyTheme(id);
+
+  // Show booster tab only for friendi
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.includes('البوستر')) {
+      const uPages = currentUser?.pages || [];
+      b.style.display = (uPages.includes('booster') && id === 'friendi') ? '' : 'none';
+    }
+  });
+
+  // ── تحميل بيانات الشركة المختارة ──
+  showSyncStatus('🔄 جاري تحميل بيانات ' + COMPANIES[id].name + '...', '#f59e0b');
+
+  // 1. جرب localStorage أولاً (سريع)
+  const localData = localStorage.getItem('st_data_' + id);
+  if (localData) {
+    try {
+      const p = JSON.parse(localData);
+      if (Array.isArray(p) && p.length > 0) {
+        RAW_DATA = p;
+        currentData = p.filter(d => d.STAFF_NO && d.Location);
+        filteredData = null;
+        renderAll();
+        updateDataDateBadge(currentData);
+        showSyncStatus('✅ ' + COMPANIES[id].name + ' · ' + p.length + ' سجل', '#10b981');
+      }
+    } catch(e) {}
+  } else {
+    // 2. جرب Firebase
+    try {
+      const res = await fetch(FB_URL.replace('/sahab','/sahab/st_data_' + id) + '.json');
+      if (res.ok) {
+        const obj = await res.json();
+        if (obj && obj.v) {
+          const p = JSON.parse(obj.v);
+          if (Array.isArray(p) && p.length > 0) {
+            RAW_DATA = p;
+            currentData = p.filter(d => d.STAFF_NO && d.Location);
+            localStorage.setItem('st_data_' + id, obj.v);
+            filteredData = null;
+            renderAll();
+            updateDataDateBadge(currentData);
+            showSyncStatus('✅ ' + COMPANIES[id].name + ' · ' + p.length + ' سجل', '#10b981');
+            return;
+          }
+        }
+      }
+    } catch(e) {}
+    showSyncStatus('⚠️ لا توجد بيانات لـ ' + COMPANIES[id].name + ' — ارفع ملف من مستودع البيانات', '#ef4444');
+    RAW_DATA = [];
+    currentData = [];
+    filteredData = null;
+    renderAll();
+  }
 }
 
 function applyCompanyTheme(id) {
@@ -2528,6 +2587,755 @@ document.addEventListener('click', () => {
   const dd = document.getElementById('company-dropdown');
   if (dd) dd.style.display = 'none';
 });
+
+
+// ============ FILE REPOSITORY ============
+const FILES_DB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab_files';
+const FB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab';
+
+async function uploadFileToRepo(input) {
+  const file = input.files[0]; if (!file) return; input.value = '';
+  if (window.location.protocol === 'file:') { alert('افتح الداشبورد من الرابط:\nhttps://sahab-telecom.github.io/Dash/'); return; }
+  const progress = document.getElementById('file-upload-progress');
+  const label = document.getElementById('file-upload-label');
+  const pctEl = document.getElementById('file-upload-pct');
+  const bar   = document.getElementById('file-upload-bar');
+  if (progress) progress.style.display = 'block';
+  const setP = (p,m) => { if(bar) bar.style.width=p+'%'; if(pctEl) pctEl.textContent=p+'%'; if(label) label.textContent=m; };
+  try {
+    setP(10,'جاري القراءة...');
+    const buf = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+    setP(30,'جاري التحليل...');
+    const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws);
+    const norm=(row,keys)=>{ for(const k of keys) if(row[k]!==undefined&&row[k]!==null) return row[k]; return null; };
+    // Auto-detect format: Red Bull (has REV2+Location) vs Virgin/Friendi (has Dealer Code + IBR)
+    const isVirginFormat = rows.length > 0 && !rows[0]['Location'] && rows[0]['Dealer Code'];
+    const data=rows.map(r=>{
+      const reportDate = r['Report Date'] ? new Date(r['Report Date']) : null;
+      return {
+        STAFF_NO:    isVirginFormat ? norm(r,['Dealer Code']) : norm(r,['STAFF_NO']),
+        Location:    isVirginFormat ? norm(r,['Dealer Code']) : norm(r,['Location']),
+        PK:          norm(r,['Segment Brand','PK','pk']),
+        REV2:        isVirginFormat ? (parseFloat(norm(r,['Initial Balance Recharge Amount Without VAT']))||0) : (parseFloat(norm(r,['REV2']))||0),
+        Addon_Value: isVirginFormat ? (parseFloat(norm(r,['Initial Balance Recharge Amount Without VAT']))||0) : (parseFloat(norm(r,['Addon Value','Addon_Value']))||0),
+        Count:       parseFloat(norm(r,['Activations','Count','count']))||1,
+        FPE:         parseFloat(norm(r,['Activations - FPE Count']))||0,
+        Brand:       norm(r,['Segment Brand','PK']) || '',
+        Day:         isVirginFormat ? (reportDate ? reportDate.getDate() : 0) : (parseInt(norm(r,['SUBSTR(CREATE_DATE,1,10) - Day','Day']))||0),
+        Month:       isVirginFormat ? (reportDate ? reportDate.toLocaleString('en',{month:'short'}) : '') : (norm(r,['SUBSTR(CREATE_DATE,1,10) - Month','Month'])||''),
+        StaffName:   norm(r,['Account Manager Name','STAFF_NO']) || ''
+      };
+    }).filter(r=>r.STAFF_NO&&r.Location&&r.Count>0);
+    if (!data.length) { setP(0,'❌ لا بيانات'); return; }
+    const days=[...new Set(data.map(d=>d.Day).filter(d=>d>0))].sort((a,b)=>a-b);
+    const locs=[...new Set(data.filter(d=>d.Location).map(d=>d.Location))];
+    const months=[...new Set(data.map(d=>d.Month).filter(Boolean))];
+    const monthAr={Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر'};
+    const monthNames=months.map(m=>monthAr[m]||m).join(' / ');
+    const fileId='f_'+Date.now();
+    const fileInfo={ id:fileId, name:file.name, sizeMB:(file.size/1024/1024).toFixed(2), count:data.length, locations:locs.length, dayFrom:days[0]||0, dayTo:days[days.length-1]||0, months:monthNames, uploadedBy:currentUser?.username||'admin', uploadedAt:new Date().toISOString() };
+    setP(50,'جاري الرفع...');
+    const dataStr=JSON.stringify(data);
+    const res=await fetch(FILES_DB_URL+'/'+fileId+'/data.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:dataStr,t:Date.now()})});
+    if (!res.ok) throw new Error('فشل: '+res.status);
+    setP(80,'حفظ المعلومات...');
+    await fetch(FILES_DB_URL+'/'+fileId+'/info.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(fileInfo)});
+    setP(100,'✅ تم!');
+    setTimeout(()=>{ if(progress) progress.style.display='none'; },2000);
+    loadFilesList();
+  } catch(e) { setP(0,'❌ '+e.message); setTimeout(()=>{ if(progress) progress.style.display='none'; },3000); }
+}
+
+async function loadFilesList() {
+  const container=document.getElementById('files-repo-list'); if(!container) return;
+  container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:30px;">🔄 جاري التحميل...</div>';
+  try {
+    const res=await fetch(FILES_DB_URL+'.json'); const data=await res.json();
+    if (!data) { container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات</div>'; return; }
+    const activeId=localStorage.getItem('st_active_file_id')||'';
+    const files=Object.entries(data).filter(([id,v])=>v.info).map(([id,v])=>({id,...v.info})).sort((a,b)=>new Date(b.uploadedAt)-new Date(a.uploadedAt));
+    if (!files.length) { container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات</div>'; return; }
+    container.innerHTML='';
+    files.forEach(f=>{
+      const isActive=f.id===activeId;
+      const date=new Date(f.uploadedAt).toLocaleDateString('ar-SA',{dateStyle:'medium'});
+      const card=document.createElement('div');
+      card.style.cssText='background:'+(isActive?'#f0fdf4':'#fafafa')+';border:2px solid '+(isActive?'#10b981':'#e5e7eb')+';border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;';
+      const info=document.createElement('div'); info.style.flex='1';
+      info.innerHTML='<div style="font-size:14px;font-weight:700;color:#0d2666;margin-bottom:6px;">'+f.name+(isActive?' <span style="background:#10b981;color:white;font-size:10px;padding:2px 8px;border-radius:8px;">نشط</span>':'')+'</div><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#6b7280;"><span>'+(f.count||0).toLocaleString('en-US')+' سجل</span><span>'+(f.locations||0)+' فرع</span><span style="color:#1a4db5;font-weight:600;">'+(f.months||'')+'</span><span>يوم '+(f.dayFrom||0)+' - '+(f.dayTo||0)+'</span><span>'+date+'</span></div>';
+      const btns=document.createElement('div'); btns.style.cssText='display:flex;gap:8px;align-items:center;flex-shrink:0;';
+      if (isActive) { const b=document.createElement('span'); b.style.cssText='background:#d1fae5;color:#065f46;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;'; b.textContent='الملف النشط'; btns.appendChild(b); }
+      else { const ab=document.createElement('button'); ab.style.cssText='background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:8px 16px;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;'; ab.textContent='تفعيل'; const fid=f.id; ab.onclick=function(){activateFile(fid,this);}; btns.appendChild(ab); }
+      const db=document.createElement('button'); db.style.cssText='background:#fee2e2;color:#b91c1c;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;'; db.textContent='حذف'; const fid2=f.id; db.onclick=function(){deleteFile(fid2);}; btns.appendChild(db);
+      card.appendChild(info); card.appendChild(btns); container.appendChild(card);
+    });
+  } catch(e) { container.innerHTML='<div style="text-align:center;color:#ef4444;padding:30px;">❌ '+e.message+'</div>'; }
+}
+
+async function activateFile(fileId, btn) {
+  if (!btn) btn=event?.target;
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.textContent='جاري...';btn.disabled=true;}
+  try {
+    const res=await fetch(FILES_DB_URL+'/'+fileId+'/data.json'); const obj=await res.json();
+    if (!obj||!obj.v) { alert('فشل التحميل'); if(btn){btn.textContent=orig;btn.disabled=false;} return; }
+    const data=JSON.parse(obj.v);
+    const metaRes=await fetch(FILES_DB_URL+'/'+fileId+'/info.json'); const meta=await metaRes.json();
+    RAW_DATA=data; currentData=data.filter(d=>d.STAFF_NO&&d.Location);
+    const dataStr=JSON.stringify(data);
+    localStorage.setItem('st_data',dataStr); localStorage.setItem('st_active_file_id',fileId);
+    localStorage.setItem('st_data_'+activeCompany, dataStr); localStorage.setItem('st_active_file_id_'+activeCompany, fileId);
+    localStorage.setItem('st_data_'+activeCompany,dataStr);
+    localStorage.setItem('st_data_meta',JSON.stringify(meta||{}));
+    await sharedSet('st_data_'+activeCompany, dataStr); await sharedSet('st_data', dataStr);
+    await sharedSet('st_update_meta',JSON.stringify({...meta,activatedAt:new Date().toISOString(),activatedBy:currentUser?.username}));
+    incVersion(); renderAll(); updateDataDateBadge(currentData); updateLastUpdateBadge(); loadFilesList();
+    showSyncStatus('تم تفعيل الملف','#10b981');
+  } catch(e) { alert('خطأ: '+e.message); if(btn){btn.textContent=orig;btn.disabled=false;} }
+}
+
+async function deleteFile(fileId) {
+  if (!confirm('حذف هذا الملف؟')) return;
+  try { await fetch(FILES_DB_URL+'/'+fileId+'.json',{method:'DELETE'}); loadFilesList(); } catch(e) { alert('خطأ'); }
+}
+
+async function downloadFile(fileId, fileName) {
+  try {
+    const res=await fetch(FILES_DB_URL+'/'+fileId+'/data.json'); const obj=await res.json();
+    if (!obj||!obj.v) { alert('فشل'); return; }
+    const data=JSON.parse(obj.v); if (!data.length) return;
+    const keys=Object.keys(data[0]);
+    const csv=[keys.join(','),...data.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download=fileName.replace('.xlsx','.csv'); a.click(); URL.revokeObjectURL(url);
+  } catch(e) { alert('خطأ: '+e.message); }
+}
+
+// ============ REFRESH ============
+async function refreshDataNow() {
+  const icon=document.getElementById('refresh-icon'); const label=document.getElementById('refresh-label');
+  const btn=document.getElementById('btn-refresh-data');
+  if(icon) icon.style.transform='rotate(360deg)';
+  if(label) label.textContent='جاري...';
+  if(btn) btn.disabled=true;
+  try {
+    await syncFromShared();
+    loadSavedSettings(); loadCashSettings();
+    const role=currentUser?.role;
+    if (role==='staff'&&currentUser?.location) currentData=RAW_DATA.filter(d=>d.Location===currentUser.location);
+    else currentData=RAW_DATA.filter(d=>d.STAFF_NO&&d.Location);
+    filteredData=null; renderAll(); updateDataDateBadge(currentData); updateLastUpdateBadge();
+    if(icon){icon.style.transform='rotate(0deg)';} if(label) label.textContent='تم ✓';
+    setTimeout(()=>{ if(label) label.textContent='تحديث'; },2500);
+  } catch(e) { if(label) label.textContent='خطأ'; setTimeout(()=>{ if(label) label.textContent='تحديث'; },2500); }
+  finally { if(btn) btn.disabled=false; }
+}
+
+// ============ BOOSTER ============
+const BOOSTER_TARGETS = {
+  'DIR-13139': { name: 'Nabil Mohamed Ahmed Taman', friendi:140, virgin:10 },
+  'DIR-13140': { name: 'Nabil Mohamed Ahmed Taman', friendi:140, virgin:10 },
+  'DIR-13141': { name: '-', friendi:140, virgin:10 }
+};
+const BOOSTER_TOTAL_TARGET = { friendi:420, virgin:30, total:477 };
+let boosterRawData=null, boosterChart=null;
+
+async function loadBoosterData() {
+  try { const s=localStorage.getItem('st_booster_data'); if(s) boosterRawData=JSON.parse(s); } catch(e) {}
+}
+
+async function uploadBoosterExcel(input) {
+  const file=input.files[0]; if(!file) return; input.value='';
+  try {
+    const buf=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+    const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{raw:false});
+    boosterRawData=rows; localStorage.setItem('st_booster_data',JSON.stringify(rows));
+    await sharedSet('st_booster_data_'+activeCompany,JSON.stringify(rows));
+    renderBoosterTab(); alert('✅ تم الرفع · '+rows.length+' سجل');
+  } catch(e) { alert('خطأ: '+e.message); }
+}
+
+function renderBoosterTab() {
+  const kpiGrid=document.getElementById('booster-kpi-grid');
+  const dealersGrid=document.getElementById('booster-dealers-grid');
+  if (!boosterRawData||!boosterRawData.length) {
+    if(kpiGrid) kpiGrid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;">📭 ارفع ملف بيانات البوستر</div>';
+    if(dealersGrid) dealersGrid.innerHTML=''; return;
+  }
+  const byCode={}; const byDay={};
+  for (const r of boosterRawData) {
+    const code=r['Dealer Code']||''; const brand=r['Segment Brand']||'';
+    const act=parseInt(r['Activations'])||0; const fpe=parseInt(r['Activations - FPE Count'])||0;
+    const ibr=parseFloat(r['Initial Balance Recharge Amount Without VAT'])||0;
+    const dateStr=r['Report Date']?new Date(r['Report Date']).toLocaleDateString('en-GB'):'';
+    if (!byCode[code]) byCode[code]={friendi:0,virgin:0,fpe:0,ibr:0};
+    if (!byDay[dateStr]) byDay[dateStr]={friendi:0,virgin:0};
+    const isF=brand.includes('FRiENDi')||brand.includes('Friendi');
+    const isV=brand.includes('Virgin');
+    if(isF){byCode[code].friendi+=act;byDay[dateStr].friendi+=act;}
+    if(isV){byCode[code].virgin+=act;byDay[dateStr].virgin+=act;}
+    byCode[code].fpe+=fpe; byCode[code].ibr+=ibr;
+  }
+  const totF=Object.values(byCode).reduce((s,v)=>s+v.friendi,0);
+  const totV=Object.values(byCode).reduce((s,v)=>s+v.virgin,0);
+  const fPct=((totF/BOOSTER_TOTAL_TARGET.friendi)*100).toFixed(1);
+  const vPct=((totV/BOOSTER_TOTAL_TARGET.virgin)*100).toFixed(1);
+  const qual=parseFloat(fPct)>=60&&parseFloat(vPct)>=60;
+  if(kpiGrid) kpiGrid.innerHTML=[
+    {label:'فرندي موبايل',val:totF,target:BOOSTER_TOTAL_TARGET.friendi,pct:fPct,color:'#c0392b'},
+    {label:'فيرجن موبايل',val:totV,target:BOOSTER_TOTAL_TARGET.virgin,pct:vPct,color:'#8b0000'},
+    {label:'أهل للعمولة؟',val:qual?'✅ نعم':'❌ لا',target:'60%+',pct:null,color:qual?'#27ae60':'#e74c3c'}
+  ].map(k=>'<div class="kpi-card" style="border-top:3px solid '+k.color+'"><div class="kpi-label">'+k.label+'</div><div class="kpi-value" style="color:'+k.color+'">'+k.val+'</div>'+(k.pct!==null?'<div class="kpi-sub"><span style="color:'+k.color+';font-weight:700;">'+k.pct+'%</span> من '+k.target+'</div>':'<div class="kpi-sub">'+k.target+'</div>')+'</div>').join('');
+  if(dealersGrid) {
+    dealersGrid.innerHTML='';
+    for (const [code,tgt] of Object.entries(BOOSTER_TARGETS)) {
+      const a=byCode[code]||{friendi:0,virgin:0,fpe:0,ibr:0};
+      const fp=((a.friendi/tgt.friendi)*100).toFixed(1); const vp=((a.virgin/tgt.virgin)*100).toFixed(1);
+      const qd=parseFloat(fp)>=60&&parseFloat(vp)>=60;
+      const card=document.createElement('div'); card.className='table-card';
+      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div><div style="font-size:14px;font-weight:800;color:#0d2666;">'+code+'</div><div style="font-size:11px;color:#6b7280;">'+tgt.name+'</div></div><span style="padding:5px 12px;border-radius:10px;font-size:12px;font-weight:700;background:'+(qd?'#d5f5e3':'#fadbd8')+';color:'+(qd?'#1e8449':'#c0392b')+'">'+(qd?'✅ أهل':'❌ دون الحد')+'</span></div>'
+        +'<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="font-weight:600;color:#c0392b;">فرندي</span><span>'+a.friendi+'/'+tgt.friendi+' ('+fp+'%)</span></div><div style="background:#f1f5f9;border-radius:8px;height:10px;"><div style="background:'+(parseFloat(fp)>=60?'#c0392b':'#e74c3c')+';border-radius:8px;height:10px;width:'+Math.min(parseFloat(fp),100)+'%;"></div></div></div>'
+        +'<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="font-weight:600;color:#8b0000;">فيرجن</span><span>'+a.virgin+'/'+tgt.virgin+' ('+vp+'%)</span></div><div style="background:#f1f5f9;border-radius:8px;height:10px;"><div style="background:'+(parseFloat(vp)>=60?'#8b0000':'#e74c3c')+';border-radius:8px;height:10px;width:'+Math.min(parseFloat(vp),100)+'%;"></div></div></div>';
+      dealersGrid.appendChild(card);
+    }
+  }
+  const days=Object.keys(byDay).sort();
+  if(boosterChart) boosterChart.destroy();
+  const chartEl=document.getElementById('chart-booster-daily');
+  if(chartEl) boosterChart=new Chart(chartEl,{type:'bar',data:{labels:days,datasets:[{label:'فرندي',data:days.map(d=>byDay[d].friendi),backgroundColor:'#c0392b',borderRadius:4},{label:'فيرجن',data:days.map(d=>byDay[d].virgin),backgroundColor:'#8b0000',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},datalabels:{display:false}},scales:{x:{stacked:false},y:{beginAtZero:true}}}});
+}
+
+
+// ============ COMPANY ISOLATION PATCH - by ChatGPT ============
+// الهدف: فصل بيانات كل شركة بالكامل عن الأخرى.
+// Red Bull: st_data_redbull / st_data_meta_redbull / st_active_file_id_redbull
+// Virgin:   st_data_friendi / st_data_meta_friendi / st_active_file_id_friendi
+
+function companyKey(base, companyId) {
+  const id = companyId || activeCompany || 'redbull';
+  return base + '_' + id;
+}
+
+function companyFilesUrl(companyId) {
+  // نخزن ملفات المستودع في نفس المسار لكن نميزها بحقل company داخل info
+  return FILES_DB_URL;
+}
+
+function getSelectedCompanyName() {
+  return (COMPANIES && COMPANIES[activeCompany] && COMPANIES[activeCompany].name) || activeCompany || 'الشركة';
+}
+
+function normalizeSalesRows(rows) {
+  const norm = (row, keys) => {
+    for (const k of keys) {
+      if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
+    }
+    return null;
+  };
+
+  const sample = rows && rows.length ? rows[0] : {};
+  const isVirginFormat =
+    activeCompany === 'friendi' ||
+    (!sample['Location'] && (sample['Dealer Code'] || sample['Account Manager Name'] || sample['Initial Balance Recharge Amount Without VAT']));
+
+  return rows.map(r => {
+    const rawDate = norm(r, ['Report Date', 'Date', 'Activation Date']);
+    const reportDate = rawDate ? new Date(rawDate) : null;
+    const value = parseFloat(norm(r, [
+      'Initial Balance Recharge Amount Without VAT',
+      'REV2', 'rev2', 'Revenue',
+      'Addon Value', 'Addon_Value', 'addon_value'
+    ])) || 0;
+
+    return {
+      Company: activeCompany,
+      STAFF_NO:    isVirginFormat ? norm(r, ['Dealer Code', 'STAFF_NO', 'staff', 'Staff']) : norm(r, ['STAFF_NO', 'staff', 'Staff', 'Dealer Code']),
+      Location:    isVirginFormat ? norm(r, ['Dealer Code', 'Location', 'location']) : norm(r, ['Location', 'location', 'Dealer Code']),
+      PK:          norm(r, ['Segment Brand', 'PK', 'pk', 'Package']),
+      REV2:        value,
+      Addon_Value: value,
+      Count:       parseFloat(norm(r, ['Activations', 'Count', 'count', 'qty'])) || 1,
+      FPE:         parseFloat(norm(r, ['Activations - FPE Count', 'FPE'])) || 0,
+      Brand:       norm(r, ['Segment Brand', 'Brand', 'PK']) || '',
+      Day:         reportDate && !isNaN(reportDate) ? reportDate.getDate() : (parseInt(norm(r, ['SUBSTR(CREATE_DATE,1,10) - Day', 'Day'])) || 0),
+      Month:       reportDate && !isNaN(reportDate) ? reportDate.toLocaleString('en', { month:'short' }) : (norm(r, ['SUBSTR(CREATE_DATE,1,10) - Month', 'Month']) || ''),
+      StaffName:   norm(r, ['Account Manager Name', 'Staff Name', 'STAFF_NO']) || ''
+    };
+  }).filter(r => r.STAFF_NO && r.Location && r.Count > 0);
+}
+
+function setCompanyData(data, filename, metaExtra) {
+  const clean = Array.isArray(data) ? data.map(r => ({ ...r, Company: activeCompany })) : [];
+  RAW_DATA = clean;
+  currentData = clean.filter(d => d.STAFF_NO && d.Location);
+  filteredData = null;
+
+  const dataStr = JSON.stringify(clean);
+  const meta = {
+    company: activeCompany,
+    companyName: getSelectedCompanyName(),
+    filename: filename || '',
+    count: clean.length,
+    updatedAt: new Date().toLocaleString('ar-SA', { dateStyle:'short', timeStyle:'short' }),
+    updatedBy: currentUser?.username || 'admin',
+    ...(metaExtra || {})
+  };
+
+  localStorage.setItem(companyKey('st_data'), dataStr);
+  localStorage.setItem(companyKey('st_data_meta'), JSON.stringify(meta));
+
+  // مفاتيح عامة للعرض الحالي فقط، لا تعتبر مصدر بيانات بين الشركات
+  localStorage.setItem('st_data', dataStr);
+  localStorage.setItem('st_data_meta', JSON.stringify(meta));
+
+  sharedSet(companyKey('st_data'), dataStr);
+  sharedSet(companyKey('st_data_meta'), JSON.stringify(meta));
+  sharedSet('st_update_meta', JSON.stringify(meta));
+
+  updateStatusBar();
+  updateDataDateBadge(currentData);
+  updateLastUpdateBadge();
+  renderAll();
+}
+
+function getCompanyDataFromStorage(companyId) {
+  const id = companyId || activeCompany || 'redbull';
+  const keys = [companyKey('st_data', id)];
+
+  // Legacy fallback: only Red Bull is allowed to read old generic st_data
+  if (id === 'redbull') keys.push('st_data');
+
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch(e) {}
+  }
+  return [];
+}
+
+function saveDataToStorage(data, filename) {
+  setCompanyData(data, filename);
+}
+
+function loadDataFromStorage() {
+  return getCompanyDataFromStorage(activeCompany);
+}
+
+function getDataMeta() {
+  const keys = [companyKey('st_data_meta')];
+  if (activeCompany === 'redbull') keys.push('st_data_meta');
+  for (const key of keys) {
+    try {
+      const m = localStorage.getItem(key);
+      if (m) return JSON.parse(m);
+    } catch(e) {}
+  }
+  return null;
+}
+
+function updateStatusBar() {
+  const statusEl = document.getElementById('file-status');
+  if (!statusEl) return;
+  const meta = getDataMeta();
+  if (meta && meta.count) {
+    statusEl.textContent = `✅ ${getSelectedCompanyName()} · ${meta.filename || 'بيانات محفوظة'} · ${meta.count} سجل · آخر تحديث: ${meta.updatedAt || '-'}`;
+  } else {
+    statusEl.textContent = `📁 لا توجد بيانات محفوظة لـ ${getSelectedCompanyName()} — ارفع ملف من مستودع البيانات`;
+  }
+}
+
+async function loadCompanyData(companyId, opts = {}) {
+  const id = companyId || activeCompany || 'redbull';
+  let data = getCompanyDataFromStorage(id);
+
+  if (!data.length) {
+    const raw = await sharedGet(companyKey('st_data', id));
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) {
+          data = parsed;
+          localStorage.setItem(companyKey('st_data', id), raw);
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (id !== activeCompany) return data;
+
+  RAW_DATA = data || [];
+  if (currentUser?.role === 'staff' && currentUser.location) {
+    currentData = RAW_DATA.filter(d => d.Location === currentUser.location);
+  } else {
+    currentData = RAW_DATA.filter(d => d.STAFF_NO && d.Location);
+  }
+  filteredData = null;
+  renderAll();
+  updateStatusBar();
+  updateDataDateBadge(currentData);
+
+  if (opts.notify) {
+    showSyncStatus(
+      data.length ? `✅ ${getSelectedCompanyName()} · ${data.length} سجل` : `⚠️ لا توجد بيانات لـ ${getSelectedCompanyName()}`,
+      data.length ? '#10b981' : '#ef4444'
+    );
+  }
+  return data;
+}
+
+async function switchCompany(id) {
+  if (!COMPANIES[id]) return;
+  const userCos = currentUser?.companies || ['redbull','friendi'];
+  if (!userCos.includes(id)) { alert('ليس لديك صلاحية الوصول لهذه الشركة'); return; }
+
+  activeCompany = id;
+  localStorage.setItem('st_active_company', id);
+  const dd = document.getElementById('company-dropdown');
+  if (dd) dd.style.display = 'none';
+
+  applyCompanyTheme(id);
+
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.includes('البوستر')) {
+      const uPages = currentUser?.pages || [];
+      b.style.display = (uPages.includes('booster') && id === 'friendi') ? '' : 'none';
+    }
+  });
+
+  const activeId = localStorage.getItem(companyKey('st_active_file_id', id)) || '';
+  if (activeId) localStorage.setItem('st_active_file_id', activeId);
+  else localStorage.removeItem('st_active_file_id');
+
+  showSyncStatus('🔄 جاري تحميل بيانات ' + COMPANIES[id].name + '...', '#f59e0b');
+  await loadCompanyData(id, { notify:true });
+  loadFilesList();
+  renderCashTab();
+}
+
+function showDashboard() {
+  if (!currentUser) return;
+  document.getElementById('hdr-username').textContent = currentUser.username;
+  const badge = document.getElementById('hdr-role-badge');
+  badge.textContent = ROLE_LABELS[currentUser.role] || currentUser.role;
+  badge.className = 'user-badge-role ' + (ROLE_CLASSES[currentUser.role] || '');
+
+  const role = currentUser.role;
+  const uPages   = currentUser.pages   || defaultPerms(role).pages;
+  const uActions = currentUser.actions || defaultPerms(role).actions;
+
+  window._canUpload       = uActions.includes('upload_excel');
+  window._canEditSettings = uActions.includes('edit_settings');
+  window._canDiscount     = uActions.includes('apply_discount');
+  window._canEditCash     = uActions.includes('edit_cash');
+  window._canManageUsers  = uActions.includes('manage_users');
+
+  const TAB_MAP = {
+    'نظرة عامة':'overview', 'الفروع':'locations', 'الموظف':'staff',
+    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings',
+    'المستخدم':'users', 'مستودع':'files', 'البوستر':'booster'
+  };
+
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const txt = b.textContent;
+    const key = Object.keys(TAB_MAP).find(k => txt.includes(k));
+    if (key) {
+      if (key === 'booster') b.style.display = (uPages.includes('booster') && activeCompany === 'friendi') ? '' : 'none';
+      else b.style.display = uPages.includes(TAB_MAP[key]) ? '' : 'none';
+    }
+  });
+
+  const uploadBanner = document.querySelector('.upload-banner');
+  if (uploadBanner) uploadBanner.style.display = window._canUpload ? '' : 'none';
+
+  loadSavedSettings();
+  loadCashSettings();
+
+  const rbO2 = document.getElementById('rb-opt-logo');
+  const frO2 = document.getElementById('fri-opt-logo');
+  if (rbO2) rbO2.src = COMPANIES.redbull.logo;
+  if (frO2) frO2.src = COMPANIES.friendi.logo;
+
+  applyCompanyTheme(activeCompany);
+  renderUsersTable();
+  updateLastUpdateBadge();
+
+  const cashBtn = document.getElementById('tab-btn-cash');
+  if (cashBtn) cashBtn.style.display = (currentUser?.role === 'admin' || currentUser?.role === 'supervisor') ? '' : 'none';
+
+  loadCompanyData(activeCompany, { notify:false });
+}
+
+async function loadExcel(event) {
+  if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('file-status');
+  if (statusEl) statusEl.textContent = `⏳ جاري تحميل ملف ${getSelectedCompanyName()}: ${file.name}...`;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      const parsed = normalizeSalesRows(rows);
+      if (!parsed.length) {
+        if (statusEl) statusEl.textContent = `❌ لا توجد بيانات صالحة في الملف`;
+        return;
+      }
+      setCompanyData(parsed, file.name);
+      markUnsaved();
+      showSyncStatus(`✅ تم تحميل ${parsed.length} سجل لـ ${getSelectedCompanyName()}`, '#10b981');
+    } catch(err) {
+      console.error(err);
+      if (statusEl) statusEl.textContent = `❌ خطأ في قراءة الملف`;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function uploadFileToRepo(input) {
+  const file = input.files[0]; if (!file) return; input.value = '';
+  if (window.location.protocol === 'file:') { alert('افتح الداشبورد من الرابط حتى يعمل الرفع على المستودع'); return; }
+
+  const progress = document.getElementById('file-upload-progress');
+  const label = document.getElementById('file-upload-label');
+  const pctEl = document.getElementById('file-upload-pct');
+  const bar   = document.getElementById('file-upload-bar');
+  if (progress) progress.style.display = 'block';
+  const setP = (p,m) => { if(bar) bar.style.width=p+'%'; if(pctEl) pctEl.textContent=p+'%'; if(label) label.textContent=m; };
+
+  try {
+    setP(10, 'جاري القراءة...');
+    const buf = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+    setP(30, 'جاري التحليل...');
+    const wb = XLSX.read(buf, { type:'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws);
+    const data = normalizeSalesRows(rows);
+
+    if (!data.length) { setP(0,'❌ لا بيانات صالحة'); return; }
+
+    const days=[...new Set(data.map(d=>d.Day).filter(d=>d>0))].sort((a,b)=>a-b);
+    const locs=[...new Set(data.filter(d=>d.Location).map(d=>d.Location))];
+    const months=[...new Set(data.map(d=>d.Month).filter(Boolean))];
+    const monthAr={Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر'};
+    const monthNames=months.map(m=>monthAr[m]||m).join(' / ');
+    const fileId='f_'+activeCompany+'_'+Date.now();
+
+    const fileInfo={
+      id:fileId,
+      company:activeCompany,
+      companyName:getSelectedCompanyName(),
+      name:file.name,
+      sizeMB:(file.size/1024/1024).toFixed(2),
+      count:data.length,
+      locations:locs.length,
+      dayFrom:days[0]||0,
+      dayTo:days[days.length-1]||0,
+      months:monthNames,
+      uploadedBy:currentUser?.username||'admin',
+      uploadedAt:new Date().toISOString()
+    };
+
+    setP(55, 'جاري الرفع...');
+    const dataStr=JSON.stringify(data);
+    const url = companyFilesUrl(activeCompany);
+    const res=await fetch(url+'/'+fileId+'/data.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:dataStr,t:Date.now(),company:activeCompany})});
+    if (!res.ok) throw new Error('فشل الرفع: '+res.status);
+    setP(85,'حفظ المعلومات...');
+    await fetch(url+'/'+fileId+'/info.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(fileInfo)});
+
+    // بعد الرفع نفعّل الملف للشركة الحالية فقط
+    setCompanyData(data, file.name, { activeFileId:fileId });
+    localStorage.setItem(companyKey('st_active_file_id'), fileId);
+    localStorage.setItem('st_active_file_id', fileId);
+    await sharedSet(companyKey('st_active_file_id'), fileId);
+
+    setP(100,'✅ تم رفع وتفعيل ملف ' + getSelectedCompanyName());
+    setTimeout(()=>{ if(progress) progress.style.display='none'; },2000);
+    loadFilesList();
+  } catch(e) {
+    console.error(e);
+    setP(0,'❌ '+e.message);
+    setTimeout(()=>{ if(progress) progress.style.display='none'; },3500);
+  }
+}
+
+async function loadFilesList() {
+  const container=document.getElementById('files-repo-list'); if(!container) return;
+  container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:30px;">🔄 جاري تحميل مستودع '+getSelectedCompanyName()+'...</div>';
+  try {
+    const res=await fetch(companyFilesUrl(activeCompany)+'.json');
+    const data=await res.json();
+    if (!data) { container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات لهذه الشركة</div>'; return; }
+
+    const activeId=localStorage.getItem(companyKey('st_active_file_id')) || localStorage.getItem('st_active_file_id') || '';
+    const files=Object.entries(data)
+      .filter(([id,v]) => v.info)
+      .map(([id,v]) => ({id,...v.info}))
+      .filter(f => f.company === activeCompany || (activeCompany === 'redbull' && !f.company)) // الملفات القديمة تعتبر ريدبول فقط
+      .sort((a,b)=>new Date(b.uploadedAt)-new Date(a.uploadedAt));
+
+    if (!files.length) { container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات لـ '+getSelectedCompanyName()+'</div>'; return; }
+    container.innerHTML='';
+
+    files.forEach(f=>{
+      const isActive=f.id===activeId;
+      const date=f.uploadedAt ? new Date(f.uploadedAt).toLocaleDateString('ar-SA',{dateStyle:'medium'}) : '-';
+      const card=document.createElement('div');
+      card.style.cssText='background:'+(isActive?'#f0fdf4':'#fafafa')+';border:2px solid '+(isActive?'#10b981':'#e5e7eb')+';border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;';
+      const info=document.createElement('div'); info.style.flex='1';
+      info.innerHTML='<div style="font-size:14px;font-weight:700;color:#0d2666;margin-bottom:6px;">'
+        +f.name+(isActive?' <span style="background:#10b981;color:white;font-size:10px;padding:2px 8px;border-radius:8px;">نشط</span>':'')
+        +' <span style="background:#eef2ff;color:#1a4db5;font-size:10px;padding:2px 8px;border-radius:8px;">'+(f.companyName||getSelectedCompanyName())+'</span></div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#6b7280;"><span>'+(f.count||0).toLocaleString('en-US')+' سجل</span><span>'+(f.locations||0)+' فرع</span><span style="color:#1a4db5;font-weight:600;">'+(f.months||'')+'</span><span>يوم '+(f.dayFrom||0)+' - '+(f.dayTo||0)+'</span><span>'+date+'</span></div>';
+      const btns=document.createElement('div'); btns.style.cssText='display:flex;gap:8px;align-items:center;flex-shrink:0;';
+      if (isActive) {
+        const b=document.createElement('span');
+        b.style.cssText='background:#d1fae5;color:#065f46;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;';
+        b.textContent='الملف النشط'; btns.appendChild(b);
+      } else {
+        const ab=document.createElement('button');
+        ab.style.cssText='background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:8px 16px;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;';
+        ab.textContent='تفعيل'; ab.onclick=function(){activateFile(f.id,this);}; btns.appendChild(ab);
+      }
+      const db=document.createElement('button');
+      db.style.cssText='background:#fee2e2;color:#b91c1c;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;';
+      db.textContent='حذف'; db.onclick=function(){deleteFile(f.id);}; btns.appendChild(db);
+      card.appendChild(info); card.appendChild(btns); container.appendChild(card);
+    });
+  } catch(e) {
+    console.error(e);
+    container.innerHTML='<div style="text-align:center;color:#ef4444;padding:30px;">❌ '+e.message+'</div>';
+  }
+}
+
+async function activateFile(fileId, btn) {
+  if (!btn) btn=event?.target;
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.textContent='جاري...';btn.disabled=true;}
+  try {
+    const url = companyFilesUrl(activeCompany);
+    const res=await fetch(url+'/'+fileId+'/data.json');
+    const obj=await res.json();
+    if (!obj||!obj.v) { alert('فشل تحميل الملف'); if(btn){btn.textContent=orig;btn.disabled=false;} return; }
+    const metaRes=await fetch(url+'/'+fileId+'/info.json');
+    const meta=await metaRes.json();
+
+    if (meta?.company && meta.company !== activeCompany) {
+      alert('هذا الملف تابع لشركة أخرى ولا يمكن تفعيله هنا');
+      if(btn){btn.textContent=orig;btn.disabled=false;}
+      return;
+    }
+
+    const data=JSON.parse(obj.v).map(r => ({...r, Company: activeCompany}));
+    localStorage.setItem(companyKey('st_active_file_id'), fileId);
+    localStorage.setItem('st_active_file_id', fileId);
+    await sharedSet(companyKey('st_active_file_id'), fileId);
+
+    setCompanyData(data, meta?.name || 'ملف محفوظ', { ...(meta || {}), activatedAt:new Date().toISOString(), activatedBy:currentUser?.username });
+    incVersion();
+    loadFilesList();
+    showSyncStatus('✅ تم تفعيل ملف '+getSelectedCompanyName(),'#10b981');
+  } catch(e) {
+    console.error(e);
+    alert('خطأ: '+e.message);
+    if(btn){btn.textContent=orig;btn.disabled=false;}
+  }
+}
+
+async function refreshDataNow() {
+  const icon=document.getElementById('refresh-icon');
+  const label=document.getElementById('refresh-label');
+  const btn=document.getElementById('btn-refresh-data');
+  if(icon) icon.style.transform='rotate(360deg)';
+  if(label) label.textContent='جاري...';
+  if(btn) btn.disabled=true;
+  try {
+    await syncFromShared();
+    loadSavedSettings();
+    loadCashSettings();
+    await loadCompanyData(activeCompany, { notify:true });
+    loadFilesList();
+    if(icon) icon.style.transform='rotate(0deg)';
+    if(label) label.textContent='تم ✓';
+    setTimeout(()=>{ if(label) label.textContent='تحديث'; },2500);
+  } catch(e) {
+    console.error(e);
+    if(label) label.textContent='خطأ';
+    setTimeout(()=>{ if(label) label.textContent='تحديث'; },2500);
+  } finally {
+    if(btn) btn.disabled=false;
+  }
+}
+
+async function syncFromShared() {
+  const db = getDB();
+  if (!db) { console.warn('Firebase not available, using localStorage'); return; }
+  showSyncStatus('🔄 جاري المزامنة...', '#f59e0b');
+  try {
+    const snap = await db.ref('sahab').once('value');
+    if (snap.exists()) {
+      const data = snap.val();
+      const sharedKeys = [
+        'st_settings','st_discount','st_cash_rules','st_cash_disc','st_users','st_update_meta',
+        companyKey('st_data','redbull'), companyKey('st_data_meta','redbull'), companyKey('st_active_file_id','redbull'),
+        companyKey('st_data','friendi'), companyKey('st_data_meta','friendi'), companyKey('st_active_file_id','friendi')
+      ];
+      for (const key of sharedKeys) {
+        const safeKey = key.replace(/[.#$\[\]]/g, '_');
+        if (data[safeKey] && data[safeKey].v) localStorage.setItem(key, data[safeKey].v);
+      }
+      showSyncStatus('✅ تمت المزامنة', '#10b981');
+    } else {
+      showSyncStatus('📭 قاعدة بيانات فارغة', '#6b7280');
+    }
+  } catch(e) {
+    console.warn('Firebase sync error:', e);
+    showSyncStatus('⚠️ تعذرت المزامنة', '#ef4444');
+  }
+}
+
+function listenForChanges() {
+  const db = getDB();
+  if (!db) return;
+
+  ['redbull','friendi'].forEach(cid => {
+    const safeMeta = companyKey('st_data_meta', cid).replace(/[.#$\[\]]/g,'_');
+    db.ref('sahab/' + safeMeta).on('value', snap => {
+      if (!snap.exists()) return;
+      const newMeta = snap.val().v;
+      const localMeta = localStorage.getItem(companyKey('st_data_meta', cid));
+      if (newMeta && newMeta !== localMeta) {
+        const dataKeys = [companyKey('st_data', cid), companyKey('st_data_meta', cid), companyKey('st_active_file_id', cid), 'st_settings','st_discount','st_cash_rules','st_cash_disc','st_update_meta'];
+        Promise.all(dataKeys.map(k => {
+          const sk = k.replace(/[.#$\[\]]/g,'_');
+          return db.ref('sahab/'+sk).once('value').then(s => { if (s.exists()) localStorage.setItem(k, s.val().v); });
+        })).then(() => {
+          if (cid === activeCompany) loadCompanyData(activeCompany, { notify:true });
+          const badge = document.getElementById('sync-alert');
+          if (badge && cid === activeCompany) { badge.style.display='flex'; setTimeout(()=>{badge.style.display='none';},4000); }
+        });
+      }
+    });
+  });
+}
+
+// تأكيد الوضع عند فتح الصفحة
+setTimeout(() => {
+  try {
+    applyCompanyTheme(activeCompany);
+    updateStatusBar();
+  } catch(e) {}
+}, 600);
+
 
 // ============ INIT ============
 let _appStarted = false;
