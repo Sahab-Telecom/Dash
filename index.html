@@ -2242,38 +2242,45 @@ function renderCashRulesInputs() {
 
   const entries = Object.values(pkMap).sort((a,b) => a.addon - b.addon || a.pk.localeCompare(b.pk, 'ar'));
 
-  // بناء جدول بدل الكاردات
-  let tableHTML = '<div style="overflow-x:auto;">'
-    + '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
-    + '<thead><tr style="background:#0d2666;color:white;">'
-    + '<th style="padding:10px 12px;text-align:right;font-weight:700;">الباقة</th>'
-    + '<th style="padding:10px 12px;text-align:center;font-weight:700;">التفعيلات</th>'
-    + '<th style="padding:10px 12px;text-align:center;font-weight:700;">القيمة</th>'
-    + '<th style="padding:10px 12px;text-align:center;font-weight:700;">شامل الضريبة</th>'
-    + '<th style="padding:10px 12px;text-align:center;font-weight:700;">سعر البيع ' + SAR + '</th>'
-    + '</tr></thead><tbody>';
+  // جدولين جنب بعض
+  const half = Math.ceil(entries.length / 2);
+  const left  = entries.slice(0, half);
+  const right = entries.slice(half);
 
-  entries.forEach(({ pk, addon }, i) => {
-    const key = pk + '|' + addon;
-    const vat = (addon * 1.15).toFixed(2);
-    const savedVal = cashRules[key] !== undefined ? cashRules[key] : addon;
-    const count = pkMap[key].count;
-    const rowBg = i % 2 === 0 ? '#ffffff' : '#f8faff';
-    tableHTML += '<tr style="background:' + rowBg + ';border-bottom:1px solid #e5e7eb;">'
-      + '<td style="padding:8px 12px;font-weight:700;color:#0d2666;">' + pk + '</td>'
-      + '<td style="padding:8px 12px;text-align:center;"><span style="background:#1a4db5;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;">' + count.toLocaleString('en-US') + '</span></td>'
-      + '<td style="padding:8px 12px;text-align:center;color:#374151;font-weight:600;">' + addon + '</td>'
-      + '<td style="padding:8px 12px;text-align:center;color:#1a4db5;font-weight:600;">' + vat + '</td>'
-      + '<td style="padding:8px 12px;text-align:center;">'
-      + '<input type="number" style="width:80px;padding:4px 8px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;text-align:center;" '
-      + 'value="' + savedVal + '" '
-      + 'data-key="' + key.replace(/"/g, '&quot;') + '" '
-      + 'onchange="var k=this.dataset.key;cashRules[k]=parseFloat(this.value)||0;updateCashPreview();">'
-      + '</td></tr>';
-  });
+  function buildTable(arr) {
+    let t = '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+      + '<thead><tr style="background:#0d2666;color:white;">'
+      + '<th style="padding:8px 10px;text-align:right;font-weight:700;white-space:nowrap;">الباقة</th>'
+      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">تفعيل</th>'
+      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">القيمة</th>'
+      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">+ضريبة</th>'
+      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">سعر البيع</th>'
+      + '</tr></thead><tbody>';
+    arr.forEach(({ pk, addon }, i) => {
+      const key = pk + '|' + addon;
+      const vat = (addon * 1.15).toFixed(2);
+      const savedVal = cashRules[key] !== undefined ? cashRules[key] : addon;
+      const count = pkMap[key].count;
+      const rowBg = i % 2 === 0 ? '#ffffff' : '#f0f4fb';
+      t += '<tr style="background:' + rowBg + ';border-bottom:1px solid #e5e7eb;">'
+        + '<td style="padding:7px 10px;font-weight:700;color:#0d2666;white-space:nowrap;">' + pk + '</td>'
+        + '<td style="padding:7px 6px;text-align:center;"><span style="background:#1a4db5;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;">' + count + '</span></td>'
+        + '<td style="padding:7px 6px;text-align:center;color:#374151;font-weight:600;">' + addon + '</td>'
+        + '<td style="padding:7px 6px;text-align:center;color:#1a4db5;font-weight:600;">' + vat + '</td>'
+        + '<td style="padding:7px 6px;text-align:center;">'
+        + '<input type="number" style="width:72px;padding:3px 6px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;text-align:center;" '
+        + 'value="' + savedVal + '" data-key="' + key.replace(/"/g,'&quot;') + '" '
+        + 'onchange="var k=this.dataset.key;cashRules[k]=parseFloat(this.value)||0;updateCashPreview();">'
+        + '</td></tr>';
+    });
+    t += '</tbody></table>';
+    return t;
+  }
 
-  tableHTML += '</tbody></table></div>';
-  container.innerHTML = tableHTML;
+  container.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
+    + '<div>' + buildTable(left)  + '</div>'
+    + '<div>' + buildTable(right) + '</div>'
+    + '</div>';
 }
 
 function renderCashTab() {
@@ -2382,7 +2389,7 @@ async function sharedGet(key) {
 
 // Sync ALL shared keys from Firebase on startup
 const SHARED_KEYS = ['st_data','st_data_meta','st_settings','st_discount',
-                     'st_cash_rules','st_cash_disc','st_users','st_update_meta'];
+                     'st_cash_rules','st_cash_disc','st_update_meta'];
 
 async function syncFromShared() {
   const db = getDB();
@@ -2393,6 +2400,7 @@ async function syncFromShared() {
     if (snap.exists()) {
       const data = snap.val();
       for (const key of SHARED_KEYS) {
+        if (key === 'st_user') continue; // لا تمسح الجلسة أبداً
         const safeKey = key.replace(/[.#$\[\]]/g, '_');
         if (data[safeKey] && data[safeKey].v) {
           localStorage.setItem(key, data[safeKey].v);
