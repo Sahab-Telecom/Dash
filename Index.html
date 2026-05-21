@@ -727,28 +727,29 @@
         <p>سحاب تيليكوم للإتصالات وتقنية المعلومات</p>
       </div>
     </div>
-    <div class="header-date" id="header-date">Modern Trade · مايو 2026</div>
-    <div id="sync-status" style="background:rgba(255,255,255,0.15);padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;display:none;color:white;"></div>
-    <div id="sync-alert" style="display:none;background:#f59e0b;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;color:white;align-items:center;gap:6px;">🔄 بيانات جديدة متاحة — تم التحديث</div>
-    <div id="data-date-badge" style="background:rgba(255,255,255,0.13);padding:6px 14px;border-radius:20px;color:white;font-size:11px;display:none;align-items:center;gap:6px;">
-      📊 آخر بيانات: <span id="data-date-text">-</span>
-    </div>
-    <div id="last-update-badge" class="last-update-badge" style="display:none;">
-      <div class="dot"></div>
-      <span id="last-update-text">-</span>
-    </div>
-    <button id="btn-refresh-data" onclick="refreshDataNow()" title="تحديث البيانات من السحابة"
-      style="background:rgba(255,255,255,0.12);border:none;color:white;padding:8px 14px;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:background .2s;"
-      onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
-      <span id="refresh-icon" style="font-size:16px;display:inline-block;transition:transform .4s;">🔄</span>
-      <span id="refresh-label">تحديث</span>
-    </button>
-    <div class="user-badge" onclick="logout()" title="اضغط لتسجيل الخروج">
-      <div>
-        <div class="user-badge-name" id="hdr-username">-</div>
-        <span class="user-badge-role" id="hdr-role-badge">-</span>
+    <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:center;flex-wrap:wrap;min-width:0;">
+      <div id="last-update-badge" class="last-update-badge" style="display:none;">
+        <div class="dot"></div>
+        <span id="last-update-text" style="font-size:11px;">-</span>
       </div>
-      <span style="color:rgba(255,255,255,0.7);font-size:18px">⏻</span>
+      <div id="data-date-badge" style="background:rgba(255,255,255,0.13);padding:5px 12px;border-radius:16px;color:white;font-size:12px;display:none;align-items:center;gap:5px;">
+        📊 <span id="data-date-text">-</span>
+      </div>
+      <div id="header-date" class="header-date">Modern Trade · مايو 2026</div>
+      <div id="sync-status" style="background:rgba(255,255,255,0.15);padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;display:none;color:white;"></div>
+      <div id="sync-alert" style="display:none;background:#f59e0b;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;color:white;align-items:center;gap:6px;">🔄 بيانات جديدة</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <button id="btn-refresh-data" onclick="refreshDataNow()" title="تحديث البيانات"
+        style="background:rgba(255,255,255,0.12);border:none;color:white;padding:7px 14px;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;"
+        onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+        <span id="refresh-icon" style="font-size:15px;display:inline-block;transition:transform .4s;">🔄</span>
+        <span id="refresh-label">تحديث</span>
+      </button>
+      <div class="user-badge" onclick="logout()" title="تسجيل الخروج">
+        <div><div class="user-badge-name" id="hdr-username">-</div><span class="user-badge-role" id="hdr-role-badge">-</span></div>
+        <span style="color:rgba(255,255,255,0.7);font-size:18px">⏻</span>
+      </div>
     </div>
   </div>
 </header>
@@ -1043,12 +1044,13 @@
     </div>
   </div>
 
+</div>
+
 
   <!-- FILES / DATA REPOSITORY TAB -->
   <div class="tab-panel" id="tab-files">
-    <!-- Upload Section -->
     <div class="table-card" style="margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div class="table-title" style="margin:0;"><span>🗄️</span> مستودع ملفات البيانات</div>
         <div style="display:flex;gap:10px;align-items:center;">
           <label style="background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;padding:10px 20px;border-radius:12px;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;">
@@ -1059,7 +1061,6 @@
         </div>
       </div>
       <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">ارفع ملفات الإكسيل هنا — تُخزّن في السحابة ومتاحة لكل الأدمن. اختر الملف النشط ليظهر في الداشبورد لجميع المستخدمين.</p>
-      <!-- Upload Progress -->
       <div id="file-upload-progress" style="display:none;background:#f0f4fb;border-radius:12px;padding:14px 18px;margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <span id="file-upload-label" style="font-size:13px;font-weight:600;color:#374151;">⏳ جاري الرفع...</span>
@@ -1069,12 +1070,14 @@
           <div id="file-upload-bar" style="background:linear-gradient(90deg,#1a4db5,#10b981);border-radius:8px;height:8px;width:0%;transition:width .3s;"></div>
         </div>
       </div>
-      <!-- Files List -->
       <div id="files-repo-list" style="display:grid;gap:12px;">
         <div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">🔄 جاري تحميل الملفات...</div>
       </div>
     </div>
   </div>
+
+
+  
 
 <script>
 // ============ AUTH SYSTEM WITH LOCALSTORAGE ============
@@ -1082,16 +1085,16 @@
 // pages: which tabs are visible
 // actions: what the user can DO inside those tabs
 const ALL_PAGES   = ['overview','locations','staff','commissions','cash','settings','users','files'];
-const ALL_ACTIONS = ['upload_excel','edit_settings','apply_discount','edit_cash','manage_users','download_file'];
+const ALL_ACTIONS = ['upload_excel','edit_settings','apply_discount','edit_cash','manage_users'];
 
 // Default permission templates (used when creating new users)
-const PERM_FULL    = { pages: ALL_PAGES, actions: ALL_ACTIONS };
+const PERM_FULL    = { pages: ALL_PAGES,                                      actions: ALL_ACTIONS };
 const PERM_VIEW    = { pages: ['overview','locations','staff','commissions','cash'], actions: [] };
 const PERM_SALES   = { pages: ['overview','locations','staff'],               actions: [] };
 const PERM_MINIMAL = { pages: ['overview','staff'],                           actions: [] };
 
 function defaultPerms(role) {
-  if (role === 'admin') return { pages: [...ALL_PAGES], actions: [...ALL_ACTIONS] }; // includes files
+  if (role === 'admin') return { pages: [...ALL_PAGES], actions: [...ALL_ACTIONS] };
   if (role === 'supervisor') return { pages: ['overview','locations','staff'], actions: [] };
   return { pages: ['overview','staff'], actions: [] };
 }
@@ -1131,7 +1134,7 @@ function loadUsers() {
             if (!merged[existing].actions) merged[existing].actions = defaultPerms(merged[existing].role).actions;
           }
         } else {
-          if (!su.pages) su.pages = defaultPerms(su.role).pages;
+          if (!su.pages) su.pages = su.role === 'admin' ? ADMIN_PAGES : SUPER_PAGES;
           merged.push(su);
         }
       }
@@ -1158,18 +1161,22 @@ function checkSession() {
   try {
     const parsedUser = JSON.parse(saved);
     if (!parsedUser || !parsedUser.username) { showLogin(); return; }
-    // Reload USERS first to make sure we have latest
-    loadUsers();
-    // Lookup user case-insensitive
+    // Always lookup fresh user from USERS list (case-insensitive)
     const fresh = USERS.find(u => u.username.toLowerCase() === parsedUser.username.toLowerCase());
-    currentUser = fresh || parsedUser;
-    console.log('[Session] User:', currentUser.username, '| RAW_DATA size:', RAW_DATA.length);
+    if (!fresh) {
+      // User not found in current list — keep saved data as fallback
+      currentUser = parsedUser;
+    } else {
+      currentUser = fresh;
+    }
+    // Ensure pages/actions always set
     if (!currentUser.pages)   currentUser.pages   = defaultPerms(currentUser.role).pages;
     if (!currentUser.actions) currentUser.actions = defaultPerms(currentUser.role).actions;
     showDashboard();
   } catch(e) {
-    // On error keep st_user and show login
+    console.warn('Session restore failed:', e);
     showLogin();
+    // Don't clear st_user on error — might be temporary
   }
 }
 
@@ -1230,7 +1237,6 @@ function showDashboard() {
   const role = currentUser.role;
 
   // ── Data filter by location ──
-  console.log('[showDashboard] Using RAW_DATA:', RAW_DATA.length, 'records');
   if (role === 'staff' && currentUser.location) {
     currentData = RAW_DATA.filter(d => d.Location === currentUser.location);
   } else {
@@ -1252,29 +1258,48 @@ function showDashboard() {
   // Tab icon → page key mapping
   const TAB_MAP = {
     'نظرة عامة':'overview', 'الفروع':'locations', 'الموظف':'staff',
-    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users', 'مستودع':'files'
+    'العمولات':'commissions', 'الكاش':'cash', 'الإعداد':'settings', 'المستخدم':'users',
+    'مستودع':'files'
   };
 
   // Show/hide each tab based on this user's pages list
   document.querySelectorAll('.tab-btn').forEach(b => {
     const txt = b.textContent;
     const key = Object.keys(TAB_MAP).find(k => txt.includes(k));
-    if (key) b.style.display = uPages.includes(TAB_MAP[key]) ? '' : 'none';
+    if (key) {
+      if (key === 'booster') {
+        // Booster only visible when Virgin/Friendi is active
+        b.style.display = (uPages.includes('booster') && activeCompany === 'friendi') ? '' : 'none';
+      } else {
+        b.style.display = uPages.includes(TAB_MAP[key]) ? '' : 'none';
+      }
+    }
   });
 
   // Upload banner
-  // upload banner removed - now only in files tab
+  const uploadBanner = document.querySelector('.upload-banner'); if(uploadBanner) uploadBanner.style.display = window._canUpload ? '' : 'none';
 
   loadSavedSettings();
   loadCashSettings();
+  // Init company logos + apply theme
+  const rbO2 = document.getElementById('rb-opt-logo');
+  const frO2 = document.getElementById('fri-opt-logo');
+  if (rbO2) rbO2.src = COMPANIES.redbull.logo;
+  if (frO2) frO2.src = COMPANIES.friendi.logo;
+  // Load company-specific data
+  const cmpData = localStorage.getItem('st_data_' + activeCompany) || localStorage.getItem('st_data');
+  if (cmpData) {
+    try {
+      const cp = JSON.parse(cmpData);
+      if (Array.isArray(cp) && cp.length > 0) { RAW_DATA = cp; }
+    } catch(e) {}
+  }
+  applyCompanyTheme(activeCompany);
   renderAll();
   renderUsersTable();
   updateLastUpdateBadge();
   const cashBtn = document.getElementById('tab-btn-cash');
   if (cashBtn) cashBtn.style.display = (currentUser?.role === 'admin' || currentUser?.role === 'supervisor') ? '' : 'none';
-  // files tab: based on page permission
-  const filesBtn = document.getElementById('tab-btn-files');
-  if (filesBtn) filesBtn.style.display = uPages.includes('files') ? '' : 'none';
   // تحميل البيانات المحفوظة من localStorage (محدّثة من الأدمن)
   const savedData = loadDataFromStorage();
   if (savedData) {
@@ -1287,7 +1312,7 @@ function showDashboard() {
 }
 
 const PAGE_NAMES   = { overview:'📊 نظرة عامة', locations:'📍 الفروع', staff:'👤 الموظفون', commissions:'💰 العمولات', cash:'💵 الكاش', settings:'⚙️ الإعدادات', users:'👥 المستخدمون', files:'🗄️ مستودع البيانات' };
-const ACTION_NAMES = { upload_excel:'⬆️ رفع إكسيل', edit_settings:'⚙️ تعديل الإعدادات', apply_discount:'✂️ الخصم', edit_cash:'💵 تعديل الكاش', manage_users:'👥 إدارة المستخدمين', download_file:'⬇️ تحميل ملف' };
+const ACTION_NAMES = { upload_excel:'⬆️ رفع إكسيل', edit_settings:'⚙️ تعديل الإعدادات', apply_discount:'✂️ الخصم', edit_cash:'💵 تعديل الكاش', manage_users:'👥 إدارة المستخدمين' };
 
 function renderUsersTable() {
   if (!(currentUser?.pages || []).includes('users')) return;
@@ -1477,12 +1502,7 @@ function togglePw(idx) {
 }
 
 // ============ EMBEDDED DATA ============
-let RAW_DATA = [];
-
-// تحميل البيانات: localStorage أولاً ثم الـ RAW_DATA المدمجة كـ fallback
-// RAW_DATA تتملأ من Firebase عند بدء التشغيل
-
-
+const RAW_DATA = [{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 130 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":130,"REV2":130,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 130","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":130,"REV2":130,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 160","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 300","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":300,"REV2":300,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00466","Location":"MTC106","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00466","Location":"MTC106","PK":"MBB 975","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":975,"REV2":975,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 160","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":325,"REV2":325,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00471","Location":"MTC105","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 160","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00470","Location":"MTC104","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00457","Location":"MTC103","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 160 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 160","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Flex 300","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":300,"REV2":300,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Flex 300","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":300,"REV2":300,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00456","Location":"MTC102","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Flex 300","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":300,"REV2":300,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Flex 300","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":300,"REV2":300,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Flex 300","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":300,"REV2":300,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00455","Location":"MTC101","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00455","Location":"MTC101","PK":"MBB 325","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":325,"REV2":325,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 120","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 130","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":130,"REV2":130,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 160","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 160","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":160,"REV2":160,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Flex 350","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":350,"REV2":350,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 95","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":95,"REV2":95,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348 ESIM","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00436","Location":"MTC092","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Blue 70","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":70,"REV2":70,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 60","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":60,"REV2":60,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":2,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":1,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":120,"REV2":120,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00484","Location":"MTC091","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":3,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 80","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":80,"REV2":80,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Flex 200","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":200,"REV2":200,"Count":1},{"Year":2026,"Month":"May","Day":5,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"citizen","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":7,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":12,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":10,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":11,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji_Max 104.348","SUB_STATE":"Active","Customer_type":"visitor","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":104,"REV2":104,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":9,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":4,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":6,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1},{"Year":2026,"Month":"May","Day":8,"STAFF_NO":"MT00475","Location":"MTC090","PK":"Mazaji 0","SUB_STATE":"Active","Customer_type":"resident","Addon_Value":35,"REV2":35,"Count":1}];
 
 // ============ SETTINGS ============
 let settings = {
@@ -1525,6 +1545,7 @@ function getLocStats() {
     const rev2 = (r.REV2 || 0) * (1 - discountPct / 100);
     map[r.Location].rev2 += rev2;
     map[r.Location].commProd += rev2 * getCommRate(r.Addon_Value || 0);  // rate from Addon_Value lookup
+    if (r.FPE !== undefined) map[r.Location].fpe = (map[r.Location].fpe || 0) + (r.FPE || 0);
   }
   return Object.values(map).sort((a, b) => b.rev2 - a.rev2);
 }
@@ -1894,92 +1915,41 @@ function saveSettings() {
   discountPct = parseFloat(document.getElementById('disc-input').value) || 0;
   renderAll();
   markUnsaved();
-  // Push to Firebase immediately
-  pushLocalToFirebase().catch(()=>{});
-  alert('✅ تم حفظ الإعدادات!');
+  alert('✅ تم حفظ الإعدادات! لا تنسى الضغط على زر الحفظ الأخضر.');
 }
 
 async function loadExcel(event) {
   if (!window._canUpload) { alert('❌ ليس لديك صلاحية رفع ملفات'); return; }
   const file = event.target.files[0];
   if (!file) return;
-
-  const statusEl = document.getElementById('file-status');
-  statusEl.textContent = `⏳ جاري تحميل: ${file.name}...`;
-
-  try {
-    // ── قراءة الملف ──
-    const arrayBuffer = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = e => resolve(e.target.result);
-      reader.onerror = e => reject(e);
-      reader.readAsArrayBuffer(file);
-    });
-
-    // ── تحليل الإكسيل ──
-    const wb   = XLSX.read(arrayBuffer, { type: 'array' });
-    const ws   = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws);
-    if (!rows.length) { statusEl.textContent = '❌ الملف فارغ'; return; }
-
-    // ── تطبيع الأعمدة ──
-    const norm = (row, keys) => { for (const k of keys) if (row[k] !== undefined) return row[k]; return null; };
-    const colMap = {
-      STAFF_NO:    ['STAFF_NO','staff','Staff'],
-      Location:    ['Location','location'],
-      PK:          ['PK','pk'],
-      REV2:        ['REV2','rev2','Revenue'],
-      Addon_Value: ['Addon Value','Addon_Value','addon_value'],
-      Count:       ['Count','count','qty'],
-      Day:         ['SUBSTR(CREATE_DATE,1,10) - Day','Day','day']
-    };
-
-    const newData = rows.map(r => ({
-      STAFF_NO:    norm(r, colMap.STAFF_NO),
-      Location:    norm(r, colMap.Location),
-      PK:          norm(r, colMap.PK),
-      REV2:        parseFloat(norm(r, colMap.REV2))        || 0,
-      Addon_Value: parseFloat(norm(r, colMap.Addon_Value)) || 0,
-      Count:       parseFloat(norm(r, colMap.Count))       || 1,
-      Day:         parseInt(norm(r, colMap.Day))           || 0,
-      Month:       norm(r, ['SUBSTR(CREATE_DATE,1,10) - Month','Month','month']) || ''
-    })).filter(r => r.STAFF_NO && r.Location);
-
-    if (!newData.length) { statusEl.textContent = '❌ لم يتم إيجاد بيانات صحيحة في الملف'; return; }
-
-    // ── تحديث الذاكرة ──
-    RAW_DATA    = newData;
-    currentData = newData;
-
-    // ── حفظ محلي ──
-    const dataStr = JSON.stringify(newData);
-    const meta    = { name: file.name, count: newData.length, at: new Date().toISOString(), by: currentUser?.username || 'admin' };
-    localStorage.setItem('st_data',      dataStr);
-    localStorage.setItem('st_data_meta', JSON.stringify(meta));
-
-    statusEl.textContent = `☁️ جاري الرفع لـ Firebase (${newData.length} سجل)...`;
-
-    // ── رفع لـ Firebase ──
+  document.getElementById('file-status').textContent = `جاري تحميل: ${file.name}...`;
+  const reader = new FileReader();
+  reader.onload = (e) => {
     try {
-      await sharedSet('st_data',       dataStr);
-      await sharedSet('st_data_meta',  JSON.stringify(meta));
-      await sharedSet('st_update_meta', JSON.stringify(meta));
-      incVersion();
-      statusEl.textContent = `✅ ${file.name} · ${newData.length} سجل · محفوظ ☁️`;
-      showSyncStatus('☁️ البيانات محفوظة', '#10b981');
-    } catch(fbErr) {
-      console.warn('Firebase upload failed:', fbErr);
-      statusEl.textContent = `✅ ${file.name} · ${newData.length} سجل (محفوظ محلياً — Firebase فشل)`;
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+      if (rows.length > 0) {
+        // Map columns
+        const colMap = { STAFF_NO: ['STAFF_NO','staff','Staff'], Location: ['Location','location'], PK: ['PK','pk'], REV2: ['REV2','rev2','Revenue'], Addon_Value: ['Addon Value','Addon_Value','addon_value'], Count: ['Count','count','qty'] };
+        const normalize = (row, keys) => { for (const k of keys) if (row[k] !== undefined) return row[k]; return null; };
+        currentData = rows.map(r => ({
+          STAFF_NO: normalize(r, colMap.STAFF_NO),
+          Location: normalize(r, colMap.Location),
+          PK: normalize(r, colMap.PK),
+          REV2: parseFloat(normalize(r, colMap.REV2)) || 0,
+          Addon_Value: parseFloat(normalize(r, colMap.Addon_Value)) || 0,
+          Count: parseFloat(normalize(r, colMap.Count)) || 1,
+          Day: r['SUBSTR(CREATE_DATE,1,10) - Day'] || r.Day || 0
+        })).filter(r => r.STAFF_NO && r.Location);
+        document.getElementById('file-status').textContent = `✅ تم تحميل ${file.name} (${currentData.length} سجل)`;
+        renderAll();
+      }
+    } catch(err) {
+      document.getElementById('file-status').textContent = `❌ خطأ في قراءة الملف`;
     }
-
-    renderAll();
-    updateDataDateBadge(currentData);
-    updateLastUpdateBadge();
-
-  } catch(err) {
-    console.error('Excel read error:', err);
-    statusEl.textContent = `❌ خطأ في قراءة الملف: ${err.message}`;
-  }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 // ============ SAVE / UNSAVED INDICATOR ============
@@ -2014,28 +1984,12 @@ function saveAll() {
 
 function updateLastUpdateBadge() {
   try {
-    const raw = localStorage.getItem('st_data_meta') || localStorage.getItem('st_update_meta');
-    if (!raw) return;
-    const meta = JSON.parse(raw);
-    if (!meta) return;
-    const name  = (meta.name  && meta.name  !== 'undefined') ? meta.name  : '';
-    const count = (meta.count && meta.count !== 'undefined') ? meta.count : (currentData ? currentData.length : '');
-    const by    = meta.uploadedBy || meta.by || meta.activatedBy || '';
-    const validBy = (by && by !== 'undefined') ? by : '';
-    const at    = meta.uploadedAt ? new Date(meta.uploadedAt).toLocaleString('ar-SA',{dateStyle:'short',timeStyle:'short'})
-                : meta.at ? meta.at : '';
-    const validAt = (at && !at.includes('undefined')) ? at : '';
-    const el = document.getElementById('last-update-text');
-    if (el) {
-      let txt = '';
-      if (name)    txt += name + ' · ';
-      if (count)   txt += count.toLocaleString('en-US') + ' سجل';
-      if (validAt) txt += ' · آخر تحديث: ' + validAt;
-      if (validBy) txt += ' · ' + validBy;
-      el.textContent = txt || 'آخر بيانات';
+    const meta = JSON.parse(localStorage.getItem('st_update_meta') || 'null');
+    if (meta) {
+      document.getElementById('last-update-text').textContent = `آخر تحديث: ${meta.at} · ${meta.by}`;
+      document.getElementById('last-update-badge').style.display = 'flex';
     }
-    document.getElementById('last-update-badge').style.display = 'flex';
-  } catch(e) { console.warn('badge error:', e); }
+  } catch(e) {}
 }
 
 function loadSavedSettings() {
@@ -2270,11 +2224,10 @@ function renderCashRulesInputs() {
   if (!currentData || !currentData.length) return;
   const container = document.getElementById('cash-rules-list');
   if (!container) return;
-
   const SAR = '<span style="font-family:Noto Kufi Arabic,Noto Sans Arabic,serif;font-size:1.6em;font-weight:900;line-height:1;vertical-align:middle;">&#x20C1;</span>';
 
-  // بناء مفتاح مركب: اسم الباقة + قيمتها (لتمييز الباقات بنفس القيمة)
-  const pkMap = {}; // key = "PK_NAME|addon_value" → { pk, addon, count }
+  // بناء مفتاح مركب: اسم الباقة + قيمتها
+  const pkMap = {};
   for (const r of currentData) {
     const pk = r.PK || '';
     const v  = r.Addon_Value || 0;
@@ -2284,7 +2237,6 @@ function renderCashRulesInputs() {
     pkMap[key].count++;
   }
 
-  // ترتيب: حسب القيمة ثم الاسم
   const entries = Object.values(pkMap).sort((a,b) => a.addon - b.addon || a.pk.localeCompare(b.pk, 'ar'));
 
   container.innerHTML = entries.map(({ pk, addon }) => {
@@ -2308,11 +2260,6 @@ function renderCashRulesInputs() {
   }).join('');
 }
 
-function updateCashPreview() {
-  cashDiscount = parseFloat(document.getElementById('cash-discount-pct')?.value || 0);
-  renderCashTab();
-}
-
 function renderCashTab() {
   const data = getActiveData();
   const locMap = {};
@@ -2320,13 +2267,8 @@ function renderCashTab() {
     if (!r.Location) continue;
     if (!locMap[r.Location]) locMap[r.Location] = { loc: r.Location, staff: r.STAFF_NO, units: 0, cashBefore: 0 };
     locMap[r.Location].units += r.Count || 1;
-    const pk      = r.PK || '';
     const addonVal = r.Addon_Value || 0;
-    const key      = pk + '|' + addonVal;
-    // جرب المفتاح المركب أولاً ثم القيمة فقط ثم القيمة نفسها fallback
-    const cashVal  = cashRules[key] !== undefined ? cashRules[key]
-                   : cashRules[addonVal] !== undefined ? cashRules[addonVal]
-                   : addonVal;
+    const cashVal = cashRules[addonVal] !== undefined ? cashRules[addonVal] : addonVal;
     locMap[r.Location].cashBefore += cashVal * (r.Count || 1);
   }
   const locs = Object.values(locMap).sort((a,b)=>b.cashBefore-a.cashBefore);
@@ -2389,24 +2331,16 @@ function showSyncStatus(msg, color='#10b981') {
 }
 
 // Write to Firebase + localStorage
-const FB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab';
-
 async function sharedSet(key, value) {
   const str = typeof value === 'string' ? value : JSON.stringify(value);
   localStorage.setItem(key, str);
+  const db = getDB();
+  if (!db) return;
   try {
     const safeKey = key.replace(/[.#$\[\]]/g, '_');
-    const res = await fetch(FB_URL + '/' + safeKey + '.json', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ v: str, t: Date.now() })
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    await db.ref('sahab/' + safeKey).set({ v: str, t: Date.now() });
     showSyncStatus('☁️ محفوظ', '#10b981');
-  } catch(e) {
-    console.warn('Firebase write error:', e);
-    showSyncStatus('⚠️ خطأ في الحفظ', '#ef4444');
-  }
+  } catch(e) { console.warn('Firebase write error:', e); showSyncStatus('⚠️ خطأ في الحفظ', '#ef4444'); }
 }
 
 // Read from Firebase (fallback to localStorage)
@@ -2427,42 +2361,25 @@ async function sharedGet(key) {
 
 // Sync ALL shared keys from Firebase on startup
 const SHARED_KEYS = ['st_data','st_data_meta','st_settings','st_discount',
-                     'st_cash_rules','st_cash_disc','st_update_meta'];
-// Note: st_users is NOT shared via Firebase (managed locally per install)
+                     'st_cash_rules','st_cash_disc','st_users','st_update_meta'];
 
 async function syncFromShared() {
+  const db = getDB();
+  if (!db) { console.warn('Firebase not available, using localStorage'); return; }
   showSyncStatus('🔄 جاري المزامنة...', '#f59e0b');
   try {
-    const res = await fetch(FB_URL + '.json');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    if (data) {
-      let updated = false;
+    const snap = await db.ref('sahab').once('value');
+    if (snap.exists()) {
+      const data = snap.val();
       for (const key of SHARED_KEYS) {
         const safeKey = key.replace(/[.#$\[\]]/g, '_');
         if (data[safeKey] && data[safeKey].v) {
           localStorage.setItem(key, data[safeKey].v);
-          updated = true;
         }
       }
-      // ── تحديث RAW_DATA ──
-      if (updated) {
-        try {
-          const saved = localStorage.getItem('st_data');
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              RAW_DATA = parsed;
-              console.log('[Firebase] RAW_DATA updated:', parsed.length, 'records (was:', RAW_DATA.length, ')');
-            }
-          }
-        } catch(e) { console.warn('RAW_DATA parse error:', e); }
-      }
-      showSyncStatus('✅ ' + RAW_DATA.length + ' سجل', '#10b981');
+      showSyncStatus('✅ تمت المزامنة', '#10b981');
     } else {
-      showSyncStatus('📭 فارغ — جاري الرفع...', '#6b7280');
-      await pushLocalToFirebase();
+      showSyncStatus('📭 قاعدة بيانات فارغة', '#6b7280');
     }
   } catch(e) {
     console.warn('Firebase sync error:', e);
@@ -2470,421 +2387,267 @@ async function syncFromShared() {
   }
 }
 
-// Push all local data to Firebase (first-time setup)
-async function pushLocalToFirebase() {
-  for (const key of SHARED_KEYS) {
-    const val = localStorage.getItem(key);
-    if (val) await sharedSet(key, val);
-  }
-  showSyncStatus('☁️ تم رفع البيانات', '#10b981');
-}
-
 // Listen for real-time changes (auto-refresh data when admin uploads)
 function listenForChanges() {
-  // Poll Firebase every 30 seconds for changes
-  setInterval(async () => {
-    try {
-      const res = await fetch(FB_URL + '/st_update_meta.json');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!data || !data.v) return;
-      const newMeta = data.v;
-      const localMeta = localStorage.getItem('st_update_meta');
-      if (newMeta !== localMeta) {
-        console.log('[Firebase] New data detected, syncing...');
-        await syncFromShared();
+  const db = getDB();
+  if (!db) return;
+  db.ref('sahab/st_data_meta').on('value', snap => {
+    if (!snap.exists()) return;
+    const newMeta = snap.val().v;
+    const localMeta = localStorage.getItem('st_data_meta');
+    if (newMeta && newMeta !== localMeta) {
+      // New data uploaded by admin — sync only data keys (NOT users/session)
+      const dataKeys = ['st_data','st_data_meta','st_settings','st_discount','st_cash_rules','st_cash_disc','st_update_meta'];
+      Promise.all(dataKeys.map(k => {
+        const sk = k.replace(/[.#$\[\]]/g,'_');
+        return db.ref('sahab/'+sk).once('value').then(s => {
+          if (s.exists()) localStorage.setItem(k, s.val().v);
+        });
+      })).then(() => {
         loadSavedSettings();
+        loadExcelFromStorage();
         loadCashSettings();
         renderAll();
         const badge = document.getElementById('sync-alert');
-        if (badge) { badge.style.display='flex'; setTimeout(()=>{ badge.style.display='none'; },4000); }
-      }
-    } catch(e) { console.warn('Poll error:', e); }
-  }, 30000);
-}
-
-function loadExcelFromStorage() {
-  try {
-    const saved = localStorage.getItem('st_data');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        RAW_DATA = parsed;
-        currentData = parsed.filter(d => d.STAFF_NO && d.Location);
-        return true;
-      }
+        if (badge) { badge.style.display='flex'; setTimeout(()=>{badge.style.display='none';},4000); }
+      });
     }
-  } catch(e) { console.warn('loadExcelFromStorage error:', e); }
-  return false;
+  });
 }
 
 
 // ============ FILE REPOSITORY ============
 const FILES_DB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab_files';
+const FB_URL = 'https://sahab-telecom-default-rtdb.firebaseio.com/sahab';
 
 async function uploadFileToRepo(input) {
-  const file = input.files[0];
-  if (!file) return;
-  input.value = '';
-  
-  // Check if running from file:// (won't work with Firebase)
-  if (window.location.protocol === 'file:') {
-    alert('لا يمكن رفع الملفات عند فتح الداشبورد من الجهاز مباشرة.\nالرجاء فتح الداشبورد من الرابط:\nhttps://sahab-telecom.github.io/Dash/');
-    return;
-  }
-
+  const file = input.files[0]; if (!file) return; input.value = '';
+  if (window.location.protocol === 'file:') { alert('افتح الداشبورد من الرابط:\nhttps://sahab-telecom.github.io/Dash/'); return; }
   const progress = document.getElementById('file-upload-progress');
-  const label    = document.getElementById('file-upload-label');
-  const pctEl    = document.getElementById('file-upload-pct');
-  const bar      = document.getElementById('file-upload-bar');
-  progress.style.display = 'block';
-  bar.style.background = 'linear-gradient(90deg,#1a4db5,#10b981)';
-
-  const setProgress = (p, msg) => {
-    bar.style.width = p + '%';
-    pctEl.textContent = p + '%';
-    label.textContent = msg;
-  };
-
+  const label = document.getElementById('file-upload-label');
+  const pctEl = document.getElementById('file-upload-pct');
+  const bar   = document.getElementById('file-upload-bar');
+  if (progress) progress.style.display = 'block';
+  const setP = (p,m) => { if(bar) bar.style.width=p+'%'; if(pctEl) pctEl.textContent=p+'%'; if(label) label.textContent=m; };
   try {
-    // ── 1. قراءة الملف ──
-    setProgress(10, 'جاري قراءة الملف...');
-    const arrayBuffer = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = e => res(e.target.result);
-      r.onerror = rej;
-      r.readAsArrayBuffer(file);
-    });
-
-    // ── 2. تحليل الإكسيل ──
-    setProgress(25, 'جاري تحليل البيانات...');
-    const wb   = XLSX.read(arrayBuffer, { type: 'array' });
-    const ws   = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws);
-    const norm = (row, keys) => { for (const k of keys) if (row[k] !== undefined) return row[k]; return null; };
-    const data = rows.map(r => ({
-      STAFF_NO:    norm(r, ['STAFF_NO','staff']),
-      Location:    norm(r, ['Location','location']),
-      PK:          norm(r, ['PK','pk']),
-      REV2:        parseFloat(norm(r, ['REV2','rev2'])) || 0,
-      Addon_Value: parseFloat(norm(r, ['Addon Value','Addon_Value'])) || 0,
-      Count:       parseFloat(norm(r, ['Count','count'])) || 1,
-      Day:         parseInt(norm(r, ['SUBSTR(CREATE_DATE,1,10) - Day','Day'])) || 0,
-      Month:       norm(r, ['SUBSTR(CREATE_DATE,1,10) - Month','Month','month']) || ''
-    })).filter(r => r.STAFF_NO && r.Location);
-
-    if (!data.length) { alert('لم يتم إيجاد بيانات في الملف'); progress.style.display='none'; return; }
-
-    // ── 3. حساب معلومات الملف ──
-    const days = [...new Set(data.map(d => d.Day).filter(d => d > 0))].sort((a,b)=>a-b);
-    const locs = [...new Set(data.map(d => d.Location))];
-    const fileId = 'f_' + Date.now();
-    const months = [...new Set(data.map(d => d.Month).filter(Boolean))];
-    const monthAr = { Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر' };
-    const monthNames = months.map(m => monthAr[m] || m).join(' / ');
-    const fileInfo = {
-      id:          fileId,
-      name:        file.name,
-      sizeMB:      (file.size / 1024 / 1024).toFixed(2),
-      count:       data.length,
-      locations:   locs.length,
-      dayFrom:     days[0] || 0,
-      dayTo:       days[days.length-1] || 0,
-      months:      monthNames,
-      uploadedBy:  currentUser?.username || 'admin',
-      uploadedAt:  new Date().toISOString(),
-      storagePath: 'excel_files/' + fileId + '.json'
-    };
-
-    // ── 4. رفع البيانات لـ Firebase Realtime Database ──
-    setProgress(40, 'جاري رفع البيانات...');
-
-    const uploadRes = await fetch(FILES_DB_URL + '/' + fileId + '/data.json', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ v: JSON.stringify(data), t: Date.now() })
-    });
-    if (!uploadRes.ok) throw new Error('فشل الرفع: ' + uploadRes.status);
-    fileInfo.storedInRTDB = true;
-    setProgress(80, 'تم رفع البيانات...');
-
-    // ── 5. حفظ معلومات الملف في Realtime Database ──
-    setProgress(92, 'جاري حفظ معلومات الملف...');
-    const metaRes = await fetch(FILES_DB_URL + '/' + fileId + '/info.json', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(fileInfo)
-    });
-    if (!metaRes.ok) throw new Error('فشل حفظ المعلومات');
-
-    setProgress(100, 'تم الرفع بنجاح!');
-    setTimeout(() => { progress.style.display = 'none'; }, 2000);
+    setP(10,'جاري القراءة...');
+    const buf = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+    setP(30,'جاري التحليل...');
+    const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws);
+    const norm=(row,keys)=>{ for(const k of keys) if(row[k]!==undefined&&row[k]!==null) return row[k]; return null; };
+    // Auto-detect format: Red Bull (has REV2+Location) vs Virgin/Friendi (has Dealer Code + IBR)
+    const isVirginFormat = rows.length > 0 && !rows[0]['Location'] && rows[0]['Dealer Code'];
+    const data=rows.map(r=>{
+      const reportDate = r['Report Date'] ? new Date(r['Report Date']) : null;
+      return {
+        STAFF_NO:    isVirginFormat ? norm(r,['Dealer Code']) : norm(r,['STAFF_NO']),
+        Location:    isVirginFormat ? norm(r,['Dealer Code']) : norm(r,['Location']),
+        PK:          norm(r,['Segment Brand','PK','pk']),
+        REV2:        isVirginFormat ? (parseFloat(norm(r,['Initial Balance Recharge Amount Without VAT']))||0) : (parseFloat(norm(r,['REV2']))||0),
+        Addon_Value: isVirginFormat ? (parseFloat(norm(r,['Initial Balance Recharge Amount Without VAT']))||0) : (parseFloat(norm(r,['Addon Value','Addon_Value']))||0),
+        Count:       parseFloat(norm(r,['Activations','Count','count']))||1,
+        FPE:         parseFloat(norm(r,['Activations - FPE Count']))||0,
+        Brand:       norm(r,['Segment Brand','PK']) || '',
+        Day:         isVirginFormat ? (reportDate ? reportDate.getDate() : 0) : (parseInt(norm(r,['SUBSTR(CREATE_DATE,1,10) - Day','Day']))||0),
+        Month:       isVirginFormat ? (reportDate ? reportDate.toLocaleString('en',{month:'short'}) : '') : (norm(r,['SUBSTR(CREATE_DATE,1,10) - Month','Month'])||''),
+        StaffName:   norm(r,['Account Manager Name','STAFF_NO']) || ''
+      };
+    }).filter(r=>r.STAFF_NO&&r.Location&&r.Count>0);
+    if (!data.length) { setP(0,'❌ لا بيانات'); return; }
+    const days=[...new Set(data.map(d=>d.Day).filter(d=>d>0))].sort((a,b)=>a-b);
+    const locs=[...new Set(data.filter(d=>d.Location).map(d=>d.Location))];
+    const months=[...new Set(data.map(d=>d.Month).filter(Boolean))];
+    const monthAr={Jan:'يناير',Feb:'فبراير',Mar:'مارس',Apr:'أبريل',May:'مايو',Jun:'يونيو',Jul:'يوليو',Aug:'أغسطس',Sep:'سبتمبر',Oct:'أكتوبر',Nov:'نوفمبر',Dec:'ديسمبر'};
+    const monthNames=months.map(m=>monthAr[m]||m).join(' / ');
+    const fileId='f_'+Date.now();
+    const fileInfo={ id:fileId, name:file.name, sizeMB:(file.size/1024/1024).toFixed(2), count:data.length, locations:locs.length, dayFrom:days[0]||0, dayTo:days[days.length-1]||0, months:monthNames, uploadedBy:currentUser?.username||'admin', uploadedAt:new Date().toISOString() };
+    setP(50,'جاري الرفع...');
+    const dataStr=JSON.stringify(data);
+    const res=await fetch(FILES_DB_URL+'/'+fileId+'/data.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:dataStr,t:Date.now()})});
+    if (!res.ok) throw new Error('فشل: '+res.status);
+    setP(80,'حفظ المعلومات...');
+    await fetch(FILES_DB_URL+'/'+fileId+'/info.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(fileInfo)});
+    setP(100,'✅ تم!');
+    setTimeout(()=>{ if(progress) progress.style.display='none'; },2000);
     loadFilesList();
-
-  } catch(e) {
-    console.error('Upload error:', e);
-    label.textContent = 'خطأ في الرفع: ' + e.message;
-    bar.style.background = '#ef4444';
-    setTimeout(() => { progress.style.display = 'none'; }, 4000);
-  }
+  } catch(e) { setP(0,'❌ '+e.message); setTimeout(()=>{ if(progress) progress.style.display='none'; },3000); }
 }
 
 async function loadFilesList() {
-  const container = document.getElementById('files-repo-list');
-  if (!container) return;
-  container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:30px;">🔄 جاري التحميل...</div>';
-
+  const container=document.getElementById('files-repo-list'); if(!container) return;
+  container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:30px;">🔄 جاري التحميل...</div>';
   try {
-    const res = await fetch(FILES_DB_URL + '.json');
-    const data = await res.json();
-
-    if (!data) {
-      container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">📭 لا توجد ملفات مرفوعة بعد</div>';
-      return;
-    }
-
-    const activeId = localStorage.getItem('st_active_file_id') || '';
-    const files = Object.entries(data)
-      .filter(([id, v]) => v.info)
-      .map(([id, v]) => ({ id, ...v.info }))
-      .sort((a,b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-
-    if (!files.length) {
-      container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات</div>';
-      return;
-    }
-
-    container.innerHTML = ''; files.forEach(f => {
-      const isActive = f.id === activeId;
-      const date = new Date(f.uploadedAt).toLocaleDateString('ar-SA', { dateStyle: 'medium' });
-
-      const card = document.createElement('div');
-      card.style.cssText = 'background:' + (isActive?'#f0fdf4':'#fafafa') + ';border:2px solid ' + (isActive?'#10b981':'#e5e7eb') + ';border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:4px;';
-
-      const info = document.createElement('div');
-      info.style.flex = '1';
-      info.innerHTML = '<div style="font-size:14px;font-weight:700;color:#0d2666;margin-bottom:6px;">'
-        + f.name + (isActive ? ' <span style="background:#10b981;color:white;font-size:10px;padding:2px 8px;border-radius:8px;margin-right:4px;">نشط</span>' : '')
-        + '</div>'
-        + '<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;">'
-        + '<span style="color:#6b7280;">' + (f.count||0).toLocaleString('en-US') + ' سجل</span>'
-        + '<span style="color:#6b7280;">' + (f.locations||0) + ' فرع</span>'
-        + '<span style="color:#1a4db5;font-weight:600;">' + (f.months||'') + '</span>'
-        + '<span style="color:#6b7280;">يوم ' + (f.dayFrom||0) + ' - ' + (f.dayTo||0) + '</span>'
-        + '<span style="color:#9ca3af;">' + (f.uploadedBy||'') + ' · ' + date + '</span>'
-        + '</div>';
-
-      const btns = document.createElement('div');
-      btns.style.cssText = 'display:flex;gap:8px;align-items:center;flex-shrink:0;';
-
-      if (isActive) {
-        const badge = document.createElement('span');
-        badge.style.cssText = 'background:#d1fae5;color:#065f46;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;';
-        badge.textContent = 'الملف النشط';
-        btns.appendChild(badge);
-      } else {
-        const ab = document.createElement('button');
-        ab.style.cssText = 'background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:8px 16px;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;';
-        ab.textContent = 'تفعيل';
-        const fid = f.id;
-        ab.onclick = function() { activateFile(fid, this); };
-        btns.appendChild(ab);
-      }
-
-      // Download button
-      const canDownload = (currentUser?.actions || []).includes('download_file');
-      if (canDownload) {
-        const dlBtn = document.createElement('button');
-        dlBtn.style.cssText = 'background:#dbeafe;color:#1e40af;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;font-weight:600;';
-        dlBtn.textContent = 'تحميل';
-        const fidDl = f.id;
-        dlBtn.onclick = function() { downloadFile(fidDl, f.name); };
-        btns.appendChild(dlBtn);
-      }
-
-      const db = document.createElement('button');
-      db.style.cssText = 'background:#fee2e2;color:#b91c1c;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;';
-      db.textContent = 'حذف';
-      const fid2 = f.id;
-      db.onclick = function() { deleteFile(fid2); };
-      btns.appendChild(db);
-
-      card.appendChild(info);
-      card.appendChild(btns);
-      container.appendChild(card);
+    const res=await fetch(FILES_DB_URL+'.json'); const data=await res.json();
+    if (!data) { container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات</div>'; return; }
+    const activeId=localStorage.getItem('st_active_file_id')||'';
+    const files=Object.entries(data).filter(([id,v])=>v.info).map(([id,v])=>({id,...v.info})).sort((a,b)=>new Date(b.uploadedAt)-new Date(a.uploadedAt));
+    if (!files.length) { container.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;">📭 لا توجد ملفات</div>'; return; }
+    container.innerHTML='';
+    files.forEach(f=>{
+      const isActive=f.id===activeId;
+      const date=new Date(f.uploadedAt).toLocaleDateString('ar-SA',{dateStyle:'medium'});
+      const card=document.createElement('div');
+      card.style.cssText='background:'+(isActive?'#f0fdf4':'#fafafa')+';border:2px solid '+(isActive?'#10b981':'#e5e7eb')+';border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;';
+      const info=document.createElement('div'); info.style.flex='1';
+      info.innerHTML='<div style="font-size:14px;font-weight:700;color:#0d2666;margin-bottom:6px;">'+f.name+(isActive?' <span style="background:#10b981;color:white;font-size:10px;padding:2px 8px;border-radius:8px;">نشط</span>':'')+'</div><div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#6b7280;"><span>'+(f.count||0).toLocaleString('en-US')+' سجل</span><span>'+(f.locations||0)+' فرع</span><span style="color:#1a4db5;font-weight:600;">'+(f.months||'')+'</span><span>يوم '+(f.dayFrom||0)+' - '+(f.dayTo||0)+'</span><span>'+date+'</span></div>';
+      const btns=document.createElement('div'); btns.style.cssText='display:flex;gap:8px;align-items:center;flex-shrink:0;';
+      if (isActive) { const b=document.createElement('span'); b.style.cssText='background:#d1fae5;color:#065f46;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;'; b.textContent='الملف النشط'; btns.appendChild(b); }
+      else { const ab=document.createElement('button'); ab.style.cssText='background:linear-gradient(135deg,#1a4db5,#0d2666);color:white;border:none;padding:8px 16px;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:700;cursor:pointer;'; ab.textContent='تفعيل'; const fid=f.id; ab.onclick=function(){activateFile(fid,this);}; btns.appendChild(ab); }
+      const db=document.createElement('button'); db.style.cssText='background:#fee2e2;color:#b91c1c;border:none;padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;'; db.textContent='حذف'; const fid2=f.id; db.onclick=function(){deleteFile(fid2);}; btns.appendChild(db);
+      card.appendChild(info); card.appendChild(btns); container.appendChild(card);
     });
-
-  } catch(e) {
-    container.innerHTML = '<div style="text-align:center;color:#ef4444;padding:30px;">❌ خطأ في التحميل: ' + e.message + '</div>';
-  }
+  } catch(e) { container.innerHTML='<div style="text-align:center;color:#ef4444;padding:30px;">❌ '+e.message+'</div>'; }
 }
 
 async function activateFile(fileId, btn) {
-  const origText = btn ? btn.textContent : '';
-  if (btn) { btn.textContent = 'جاري...'; btn.disabled = true; }
-
+  if (!btn) btn=event?.target;
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.textContent='جاري...';btn.disabled=true;}
   try {
-    // 1. جلب البيانات
-    let data = null;
+    const res=await fetch(FILES_DB_URL+'/'+fileId+'/data.json'); const obj=await res.json();
+    if (!obj||!obj.v) { alert('فشل التحميل'); if(btn){btn.textContent=orig;btn.disabled=false;} return; }
+    const data=JSON.parse(obj.v);
+    const metaRes=await fetch(FILES_DB_URL+'/'+fileId+'/info.json'); const meta=await metaRes.json();
+    RAW_DATA=data; currentData=data.filter(d=>d.STAFF_NO&&d.Location);
+    const dataStr=JSON.stringify(data);
+    localStorage.setItem('st_data',dataStr); localStorage.setItem('st_active_file_id',fileId);
+    localStorage.setItem('st_data_'+activeCompany, dataStr); localStorage.setItem('st_active_file_id_'+activeCompany, fileId);
+    localStorage.setItem('st_data_'+activeCompany,dataStr);
+    localStorage.setItem('st_data_meta',JSON.stringify(meta||{}));
+    await sharedSet('st_data_'+activeCompany, dataStr); await sharedSet('st_data', dataStr);
+    await sharedSet('st_update_meta',JSON.stringify({...meta,activatedAt:new Date().toISOString(),activatedBy:currentUser?.username}));
+    incVersion(); renderAll(); updateDataDateBadge(currentData); updateLastUpdateBadge(); loadFilesList();
+    showSyncStatus('تم تفعيل الملف','#10b981');
+  } catch(e) { alert('خطأ: '+e.message); if(btn){btn.textContent=orig;btn.disabled=false;} }
+}
 
-    // أولاً: جرب Realtime Database
-    const dataRes = await fetch(FILES_DB_URL + '/' + fileId + '/data.json');
-    const dataObj = await dataRes.json();
-    if (dataObj && dataObj.v) {
-      data = JSON.parse(dataObj.v);
-    }
-
-    // إذا فارغ، جرب Storage URL من info
-    if (!data) {
-      const infoRes = await fetch(FILES_DB_URL + '/' + fileId + '/info.json');
-      const fileInfo = await infoRes.json();
-      if (fileInfo && fileInfo.downloadURL) {
-        const r = await fetch(fileInfo.downloadURL);
-        data = await r.json();
-      }
-    }
-
-    if (!data || !data.length) {
-      alert('فشل تحميل بيانات الملف');
-      if (btn) { btn.textContent = origText; btn.disabled = false; }
-      return;
-    }
-
-    // 2. جلب معلومات الملف
-    const metaRes = await fetch(FILES_DB_URL + '/' + fileId + '/info.json');
-    const fileMeta = await metaRes.json();
-
-    // 3. تحديث الداشبورد
-    RAW_DATA    = data;
-    currentData = data.filter(d => d.STAFF_NO && d.Location);
-
-    // 4. حفظ محلي وFirebase
-    const dataStr = JSON.stringify(data);
-    localStorage.setItem('st_data',          dataStr);
-    localStorage.setItem('st_active_file_id', fileId);
-    localStorage.setItem('st_data_meta',      JSON.stringify(fileMeta || {}));
-
-    await sharedSet('st_data',        dataStr);
-    await sharedSet('st_data_meta',   JSON.stringify(fileMeta || {}));
-    await sharedSet('st_update_meta', JSON.stringify({ id: fileId, activatedBy: currentUser?.username, activatedAt: new Date().toISOString() }));
-
-    incVersion();
-    renderAll();
-    updateDataDateBadge(currentData);
-    updateLastUpdateBadge();
-    loadFilesList();
-    showSyncStatus('تم تفعيل الملف لجميع المستخدمين', '#10b981');
-
-  } catch(e) {
-    console.error('activateFile error:', e);
-    alert('خطأ: ' + e.message);
-    if (btn) { btn.textContent = origText; btn.disabled = false; }
-  }
+async function deleteFile(fileId) {
+  if (!confirm('حذف هذا الملف؟')) return;
+  try { await fetch(FILES_DB_URL+'/'+fileId+'.json',{method:'DELETE'}); loadFilesList(); } catch(e) { alert('خطأ'); }
 }
 
 async function downloadFile(fileId, fileName) {
   try {
-    const res = await fetch(FILES_DB_URL + '/' + fileId + '/data.json');
-    const obj = await res.json();
-    if (!obj || !obj.v) { alert('فشل تحميل البيانات'); return; }
-    const data = JSON.parse(obj.v);
-    // Convert back to CSV for download
-    if (!data.length) { alert('لا توجد بيانات'); return; }
-    const keys = Object.keys(data[0]);
-    const csv = [keys.join(','), ...data.map(r => keys.map(k => JSON.stringify(r[k] ?? '')).join(','))].join('\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fileName.replace('.xlsx', '.csv');
-    a.click(); URL.revokeObjectURL(url);
-  } catch(e) { alert('خطأ في التحميل: ' + e.message); }
+    const res=await fetch(FILES_DB_URL+'/'+fileId+'/data.json'); const obj=await res.json();
+    if (!obj||!obj.v) { alert('فشل'); return; }
+    const data=JSON.parse(obj.v); if (!data.length) return;
+    const keys=Object.keys(data[0]);
+    const csv=[keys.join(','),...data.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download=fileName.replace('.xlsx','.csv'); a.click(); URL.revokeObjectURL(url);
+  } catch(e) { alert('خطأ: '+e.message); }
 }
 
-async function deleteFile(fileId) {
-  if (!confirm('هل تريد حذف هذا الملف نهائياً؟')) return;
-  try {
-    await fetch(FILES_DB_URL + '/' + fileId + '.json', { method: 'DELETE' });
-    loadFilesList();
-  } catch(e) { alert('❌ خطأ في الحذف'); }
-}
-
-// ============ MANUAL REFRESH ============
+// ============ REFRESH ============
 async function refreshDataNow() {
-  const icon  = document.getElementById('refresh-icon');
-  const label = document.getElementById('refresh-label');
-  if (!icon || !label) return;
-
-  // Spin animation
-  icon.style.transform = 'rotate(360deg)';
-  label.textContent = 'جاري التحديث...';
-  document.getElementById('btn-refresh-data').disabled = true;
-
+  const icon=document.getElementById('refresh-icon'); const label=document.getElementById('refresh-label');
+  const btn=document.getElementById('btn-refresh-data');
+  if(icon) icon.style.transform='rotate(360deg)';
+  if(label) label.textContent='جاري...';
+  if(btn) btn.disabled=true;
   try {
     await syncFromShared();
+    loadSavedSettings(); loadCashSettings();
+    const role=currentUser?.role;
+    if (role==='staff'&&currentUser?.location) currentData=RAW_DATA.filter(d=>d.Location===currentUser.location);
+    else currentData=RAW_DATA.filter(d=>d.STAFF_NO&&d.Location);
+    filteredData=null; renderAll(); updateDataDateBadge(currentData); updateLastUpdateBadge();
+    if(icon){icon.style.transform='rotate(0deg)';} if(label) label.textContent='تم ✓';
+    setTimeout(()=>{ if(label) label.textContent='تحديث'; },2500);
+  } catch(e) { if(label) label.textContent='خطأ'; setTimeout(()=>{ if(label) label.textContent='تحديث'; },2500); }
+  finally { if(btn) btn.disabled=false; }
+}
 
-    // Update UI with new data
-    loadSavedSettings();
-    loadCashSettings();
+// ============ BOOSTER ============
+const BOOSTER_TARGETS = {
+  'DIR-13139': { name: 'Nabil Mohamed Ahmed Taman', friendi:140, virgin:10 },
+  'DIR-13140': { name: 'Nabil Mohamed Ahmed Taman', friendi:140, virgin:10 },
+  'DIR-13141': { name: '-', friendi:140, virgin:10 }
+};
+const BOOSTER_TOTAL_TARGET = { friendi:420, virgin:30, total:477 };
+let boosterRawData=null, boosterChart=null;
 
-    // Reload data based on role
-    const role = currentUser?.role;
-    if (role === 'staff' && currentUser?.location) {
-      currentData = RAW_DATA.filter(d => d.Location === currentUser.location);
-    } else {
-      currentData = RAW_DATA.filter(d => d.STAFF_NO && d.Location);
-    }
+async function loadBoosterData() {
+  try { const s=localStorage.getItem('st_booster_data'); if(s) boosterRawData=JSON.parse(s); } catch(e) {}
+}
 
-    filteredData = null; // clear date filter
-    renderAll();
-    updateDataDateBadge(currentData);
-    updateLastUpdateBadge();
+async function uploadBoosterExcel(input) {
+  const file=input.files[0]; if(!file) return; input.value='';
+  try {
+    const buf=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+    const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{raw:false});
+    boosterRawData=rows; localStorage.setItem('st_booster_data',JSON.stringify(rows));
+    await sharedSet('st_booster_data_'+activeCompany,JSON.stringify(rows));
+    renderBoosterTab(); alert('✅ تم الرفع · '+rows.length+' سجل');
+  } catch(e) { alert('خطأ: '+e.message); }
+}
 
-    // Success feedback
-    icon.style.transform = 'rotate(0deg)';
-    label.textContent = 'تم التحديث ✓';
-    showSyncStatus('تم التحديث · ' + RAW_DATA.length + ' سجل', '#10b981');
-    setTimeout(() => { label.textContent = 'تحديث'; }, 2500);
-
-  } catch(e) {
-    icon.style.transform = 'rotate(0deg)';
-    label.textContent = 'خطأ في التحديث';
-    setTimeout(() => { label.textContent = 'تحديث'; }, 2500);
-  } finally {
-    document.getElementById('btn-refresh-data').disabled = false;
-    setTimeout(() => { icon.style.transition = 'none'; icon.style.transform = 'rotate(0deg)'; setTimeout(() => { icon.style.transition = 'transform .4s'; }, 50); }, 500);
+function renderBoosterTab() {
+  const kpiGrid=document.getElementById('booster-kpi-grid');
+  const dealersGrid=document.getElementById('booster-dealers-grid');
+  if (!boosterRawData||!boosterRawData.length) {
+    if(kpiGrid) kpiGrid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;">📭 ارفع ملف بيانات البوستر</div>';
+    if(dealersGrid) dealersGrid.innerHTML=''; return;
   }
+  const byCode={}; const byDay={};
+  for (const r of boosterRawData) {
+    const code=r['Dealer Code']||''; const brand=r['Segment Brand']||'';
+    const act=parseInt(r['Activations'])||0; const fpe=parseInt(r['Activations - FPE Count'])||0;
+    const ibr=parseFloat(r['Initial Balance Recharge Amount Without VAT'])||0;
+    const dateStr=r['Report Date']?new Date(r['Report Date']).toLocaleDateString('en-GB'):'';
+    if (!byCode[code]) byCode[code]={friendi:0,virgin:0,fpe:0,ibr:0};
+    if (!byDay[dateStr]) byDay[dateStr]={friendi:0,virgin:0};
+    const isF=brand.includes('FRiENDi')||brand.includes('Friendi');
+    const isV=brand.includes('Virgin');
+    if(isF){byCode[code].friendi+=act;byDay[dateStr].friendi+=act;}
+    if(isV){byCode[code].virgin+=act;byDay[dateStr].virgin+=act;}
+    byCode[code].fpe+=fpe; byCode[code].ibr+=ibr;
+  }
+  const totF=Object.values(byCode).reduce((s,v)=>s+v.friendi,0);
+  const totV=Object.values(byCode).reduce((s,v)=>s+v.virgin,0);
+  const fPct=((totF/BOOSTER_TOTAL_TARGET.friendi)*100).toFixed(1);
+  const vPct=((totV/BOOSTER_TOTAL_TARGET.virgin)*100).toFixed(1);
+  const qual=parseFloat(fPct)>=60&&parseFloat(vPct)>=60;
+  if(kpiGrid) kpiGrid.innerHTML=[
+    {label:'فرندي موبايل',val:totF,target:BOOSTER_TOTAL_TARGET.friendi,pct:fPct,color:'#c0392b'},
+    {label:'فيرجن موبايل',val:totV,target:BOOSTER_TOTAL_TARGET.virgin,pct:vPct,color:'#8b0000'},
+    {label:'أهل للعمولة؟',val:qual?'✅ نعم':'❌ لا',target:'60%+',pct:null,color:qual?'#27ae60':'#e74c3c'}
+  ].map(k=>'<div class="kpi-card" style="border-top:3px solid '+k.color+'"><div class="kpi-label">'+k.label+'</div><div class="kpi-value" style="color:'+k.color+'">'+k.val+'</div>'+(k.pct!==null?'<div class="kpi-sub"><span style="color:'+k.color+';font-weight:700;">'+k.pct+'%</span> من '+k.target+'</div>':'<div class="kpi-sub">'+k.target+'</div>')+'</div>').join('');
+  if(dealersGrid) {
+    dealersGrid.innerHTML='';
+    for (const [code,tgt] of Object.entries(BOOSTER_TARGETS)) {
+      const a=byCode[code]||{friendi:0,virgin:0,fpe:0,ibr:0};
+      const fp=((a.friendi/tgt.friendi)*100).toFixed(1); const vp=((a.virgin/tgt.virgin)*100).toFixed(1);
+      const qd=parseFloat(fp)>=60&&parseFloat(vp)>=60;
+      const card=document.createElement('div'); card.className='table-card';
+      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div><div style="font-size:14px;font-weight:800;color:#0d2666;">'+code+'</div><div style="font-size:11px;color:#6b7280;">'+tgt.name+'</div></div><span style="padding:5px 12px;border-radius:10px;font-size:12px;font-weight:700;background:'+(qd?'#d5f5e3':'#fadbd8')+';color:'+(qd?'#1e8449':'#c0392b')+'">'+(qd?'✅ أهل':'❌ دون الحد')+'</span></div>'
+        +'<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="font-weight:600;color:#c0392b;">فرندي</span><span>'+a.friendi+'/'+tgt.friendi+' ('+fp+'%)</span></div><div style="background:#f1f5f9;border-radius:8px;height:10px;"><div style="background:'+(parseFloat(fp)>=60?'#c0392b':'#e74c3c')+';border-radius:8px;height:10px;width:'+Math.min(parseFloat(fp),100)+'%;"></div></div></div>'
+        +'<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="font-weight:600;color:#8b0000;">فيرجن</span><span>'+a.virgin+'/'+tgt.virgin+' ('+vp+'%)</span></div><div style="background:#f1f5f9;border-radius:8px;height:10px;"><div style="background:'+(parseFloat(vp)>=60?'#8b0000':'#e74c3c')+';border-radius:8px;height:10px;width:'+Math.min(parseFloat(vp),100)+'%;"></div></div></div>';
+      dealersGrid.appendChild(card);
+    }
+  }
+  const days=Object.keys(byDay).sort();
+  if(boosterChart) boosterChart.destroy();
+  const chartEl=document.getElementById('chart-booster-daily');
+  if(chartEl) boosterChart=new Chart(chartEl,{type:'bar',data:{labels:days,datasets:[{label:'فرندي',data:days.map(d=>byDay[d].friendi),backgroundColor:'#c0392b',borderRadius:4},{label:'فيرجن',data:days.map(d=>byDay[d].virgin),backgroundColor:'#8b0000',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},datalabels:{display:false}},scales:{x:{stacked:false},y:{beginAtZero:true}}}});
 }
 
 // ============ INIT ============
 let _appStarted = false;
-async function startApp() {
+function startApp() {
   if (_appStarted) return;
   _appStarted = true;
-
-  // ── 1. أولاً: حمّل من localStorage (سريع) ──
-  try {
-    const local = localStorage.getItem('st_data');
-    if (local) {
-      const p = JSON.parse(local);
-      if (Array.isArray(p) && p.length > 0) {
-        RAW_DATA = p;
-        console.log('[Local] RAW_DATA:', p.length, 'records');
-      }
-    }
-  } catch(e) {}
-
-  // ── 2. ثم: حمّل من Firebase (أحدث) وانتظر ──
-  await syncFromShared();
-  console.log('[Firebase] RAW_DATA after sync:', RAW_DATA.length, 'records');
-
-  // ── 3. سجّل الدخول بعد التحديث ──
-  checkSession();
-  setTimeout(listenForChanges, 2000);
+  syncFromShared().then(() => {
+    checkSession();
+    setTimeout(listenForChanges, 1000);
+  });
 }
 
-window.addEventListener('load', () => setTimeout(startApp, 200));
+// Always wait for full page load to ensure Firebase SDK is ready
+window.addEventListener('load', () => setTimeout(startApp, 300));
 </script>
 </body>
 </html>
-
-
