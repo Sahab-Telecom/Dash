@@ -818,6 +818,12 @@
       </div>
     </div>
 
+    <!-- Daily SIMs Count Chart -->
+    <div class="table-card" style="margin-top:16px;">
+      <div class="chart-title"><span>📊</span> SIMs Count اليومية</div>
+      <div class="chart-wrap"><canvas id="chart-daily-sims"></canvas></div>
+    </div>
+
   </div>
 
   <!-- LOCATIONS TAB -->
@@ -1026,7 +1032,7 @@
     <div class="table-card" style="margin-bottom:20px;">
       <div class="table-title"><span>⚙️</span> إعدادات الكاش المحصل</div>
       <p style="font-size:12px;color:#6b7280;margin-bottom:16px;">حدد مقابل كل باقة (Addon Value) كم ريال كاش مستهدف.</p>
-      <div id="cash-rules-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;"></div>
+      <div id="cash-rules-list" style="width:100%;overflow:hidden;" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;"></div>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:13px;font-weight:600;color:#374151;">نسبة الخصم على الكاش</span>
@@ -1586,9 +1592,9 @@ function renderKPIs(data) {
     </div>
     <div class="kpi-card green">
       <div class="kpi-icon">📱</div>
-      <div class="kpi-label">إجمالي السيمز</div>
+      <div class="kpi-label">SIMs Count</div>
       <div class="kpi-value">${fmt(sims)}</div>
-      <div class="kpi-sub">شريحة</div>
+      <div class="kpi-sub">SIMs</div>
     </div>
     <div class="kpi-card orange">
       <div class="kpi-icon">📍</div>
@@ -1872,6 +1878,52 @@ function renderCharts(locStats) {
     },
     plugins: [ChartDataLabels]
   });
+
+  // ── شارت SIMs Count اليومية ──
+  const simsMap = {};
+  for (const r of currentData) {
+    const d = r.Day || 0;
+    if (!d) continue;
+    simsMap[d] = (simsMap[d] || 0) + (r.Count || 1);
+  }
+  const simDays  = Object.keys(simsMap).map(Number).sort((a,b)=>a-b);
+  const simVals  = simDays.map(d => simsMap[d]);
+  const simLabels = simDays.map(d => d + ' ' + (currentData[0]?.Month || 'مايو'));
+
+  if (charts.dailySims) charts.dailySims.destroy();
+  const simsEl = document.getElementById('chart-daily-sims');
+  if (simsEl) {
+    charts.dailySims = new Chart(simsEl, {
+      type: 'bar',
+      data: {
+        labels: simLabels,
+        datasets: [{
+          label: 'SIMs Count اليومية',
+          data: simVals,
+          backgroundColor: 'rgba(26,77,181,0.75)',
+          borderColor: '#0d2666',
+          borderWidth: 1,
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            display: true, anchor: 'end', align: 'start', offset: -4,
+            color: '#ffffff', font: { size: 11, weight: '900' },
+            formatter: v => v ? v.toLocaleString('en-US') : ''
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('en-US') } }
+        },
+        layout: { padding: { top: 24 } }
+      },
+      plugins: [ChartDataLabels]
+    });
+  }
 }
 
 function renderAll() {
@@ -2242,33 +2294,35 @@ function renderCashRulesInputs() {
 
   const entries = Object.values(pkMap).sort((a,b) => a.addon - b.addon || a.pk.localeCompare(b.pk, 'ar'));
 
-  // جدولين جنب بعض
-  const half = Math.ceil(entries.length / 2);
-  const left  = entries.slice(0, half);
-  const right = entries.slice(half);
+  // عدد الأعمدة ديناميكي: ≤12→1، ≤24→2، أكثر→3
+  const cols = entries.length <= 12 ? 1 : entries.length <= 24 ? 2 : 3;
+  const perCol = Math.ceil(entries.length / cols);
+  const chunks = [];
+  for (let i = 0; i < cols; i++) chunks.push(entries.slice(i * perCol, (i + 1) * perCol));
 
   function buildTable(arr) {
-    let t = '<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+    if (!arr.length) return '';
+    let t = '<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;">'
       + '<thead><tr style="background:#0d2666;color:white;">'
-      + '<th style="padding:8px 10px;text-align:right;font-weight:700;white-space:nowrap;">الباقة</th>'
-      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">تفعيل</th>'
-      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">القيمة</th>'
-      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">+ضريبة</th>'
-      + '<th style="padding:8px 6px;text-align:center;font-weight:700;">سعر البيع</th>'
+      + '<th style="padding:8px 10px;text-align:right;font-weight:700;width:30%;">الباقة</th>'
+      + '<th style="padding:8px 4px;text-align:center;font-weight:700;width:14%;">القيمة</th>'
+      + '<th style="padding:8px 4px;text-align:center;font-weight:700;width:16%;">+ضريبة</th>'
+      + '<th style="padding:8px 4px;text-align:center;font-weight:700;width:14%;">تفعيل</th>'
+      + '<th style="padding:8px 4px;text-align:center;font-weight:700;width:26%;">سعر البيع</th>'
       + '</tr></thead><tbody>';
     arr.forEach(({ pk, addon }, i) => {
       const key = pk + '|' + addon;
       const vat = (addon * 1.15).toFixed(2);
       const savedVal = cashRules[key] !== undefined ? cashRules[key] : addon;
-      const count = pkMap[key].count;
-      const rowBg = i % 2 === 0 ? '#ffffff' : '#f0f4fb';
-      t += '<tr style="background:' + rowBg + ';border-bottom:1px solid #e5e7eb;">'
-        + '<td style="padding:7px 10px;font-weight:700;color:#0d2666;white-space:nowrap;">' + pk + '</td>'
-        + '<td style="padding:7px 6px;text-align:center;"><span style="background:#1a4db5;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;">' + count + '</span></td>'
-        + '<td style="padding:7px 6px;text-align:center;color:#374151;font-weight:600;">' + addon + '</td>'
-        + '<td style="padding:7px 6px;text-align:center;color:#1a4db5;font-weight:600;">' + vat + '</td>'
-        + '<td style="padding:7px 6px;text-align:center;">'
-        + '<input type="number" style="width:72px;padding:3px 6px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;text-align:center;" '
+      const cnt = pkMap[key].count;
+      const bg = i % 2 === 0 ? '#ffffff' : '#f0f4fb';
+      t += '<tr style="background:' + bg + ';border-bottom:1px solid #e5e7eb;">'
+        + '<td style="padding:6px 8px;font-weight:700;color:#0d2666;font-size:11px;word-break:break-word;">' + pk + '</td>'
+        + '<td style="padding:7px 4px;text-align:center;color:#374151;font-weight:600;">' + addon + '</td>'
+        + '<td style="padding:7px 4px;text-align:center;color:#1a4db5;font-weight:600;">' + vat + '</td>'
+        + '<td style="padding:7px 4px;text-align:center;"><span style="background:#1a4db5;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;">' + cnt + '</span></td>'
+        + '<td style="padding:7px 4px;text-align:center;">'
+        + '<input type="number" style="width:100%;max-width:70px;padding:4px 4px;border:1.5px solid #d1d5db;border-radius:8px;font-family:Cairo,sans-serif;font-size:11px;text-align:center;background:white;box-sizing:border-box;" '
         + 'value="' + savedVal + '" data-key="' + key.replace(/"/g,'&quot;') + '" '
         + 'onchange="var k=this.dataset.key;cashRules[k]=parseFloat(this.value)||0;updateCashPreview();">'
         + '</td></tr>';
@@ -2277,9 +2331,9 @@ function renderCashRulesInputs() {
     return t;
   }
 
-  container.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
-    + '<div>' + buildTable(left)  + '</div>'
-    + '<div>' + buildTable(right) + '</div>'
+  const gridCols = cols === 1 ? '1fr' : cols === 2 ? '1fr 1fr' : '1fr 1fr 1fr';
+  container.innerHTML = '<div style="display:grid;grid-template-columns:' + gridCols + ';gap:16px;align-items:start;direction:rtl;width:100%;">'
+    + chunks.map(c => '<div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);width:100%;min-width:0;">' + buildTable(c) + '</div>').join('')
     + '</div>';
 }
 
@@ -2362,12 +2416,15 @@ function showSyncStatus(msg, color='#10b981') {
 async function sharedSet(key, value) {
   const str = typeof value === 'string' ? value : JSON.stringify(value);
   localStorage.setItem(key, str);
-  const db = getDB();
-  if (!db) return;
   try {
     const safeKey = key.replace(/[.#$\[\]]/g, '_');
-    await db.ref('sahab/' + safeKey).set({ v: str, t: Date.now() });
-    showSyncStatus('☁️ محفوظ', '#10b981');
+    const res = await fetch('https://sahab-telecom-default-rtdb.firebaseio.com/sahab/' + safeKey + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ v: str, t: Date.now() })
+    });
+    if (res.ok) showSyncStatus('☁️ محفوظ', '#10b981');
+    else throw new Error('HTTP ' + res.status);
   } catch(e) { console.warn('Firebase write error:', e); showSyncStatus('⚠️ خطأ في الحفظ', '#ef4444'); }
 }
 
