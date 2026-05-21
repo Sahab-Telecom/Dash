@@ -1294,7 +1294,6 @@ function showDashboard() {
       if (Array.isArray(cp) && cp.length > 0) { RAW_DATA = cp; }
     } catch(e) {}
   }
-  applyCompanyTheme(activeCompany);
   renderAll();
   renderUsersTable();
   updateLastUpdateBadge();
@@ -2634,6 +2633,8 @@ function renderBoosterTab() {
   const chartEl=document.getElementById('chart-booster-daily');
   if(chartEl) boosterChart=new Chart(chartEl,{type:'bar',data:{labels:days,datasets:[{label:'فرندي',data:days.map(d=>byDay[d].friendi),backgroundColor:'#c0392b',borderRadius:4},{label:'فيرجن',data:days.map(d=>byDay[d].virgin),backgroundColor:'#8b0000',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},datalabels:{display:false}},scales:{x:{stacked:false},y:{beginAtZero:true}}}});
 }
+
+let activeCompany = localStorage.getItem('st_active_company') || 'redbull';
 
 // ============ INIT ============
 let _appStarted = false;
