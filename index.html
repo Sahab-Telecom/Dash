@@ -2663,14 +2663,35 @@ let _appStarted = false;
 function startApp() {
   if (_appStarted) return;
   _appStarted = true;
+
+  // ── 1. فوراً: استعد الجلسة من localStorage ──
+  checkSession();
+
+  // ── 2. في الخلفية: زامن مع Firebase وحدّث البيانات ──
   syncFromShared().then(() => {
-    checkSession();
+    // تحديث البيانات في الخلفية بدون إظهار login
+    try {
+      loadSavedSettings();
+      loadCashSettings();
+      if (currentUser) {
+        const cmpData = localStorage.getItem('st_data_' + activeCompany) || localStorage.getItem('st_data');
+        if (cmpData) {
+          const p = JSON.parse(cmpData);
+          if (Array.isArray(p) && p.length > 0) { RAW_DATA = p; currentData = p.filter(d => d.STAFF_NO && d.Location); }
+        }
+        renderAll();
+        updateDataDateBadge(currentData);
+        updateLastUpdateBadge();
+      }
+    } catch(e) { console.warn('Background sync error:', e); }
     setTimeout(listenForChanges, 1000);
+  }).catch(() => {
+    // Firebase فشل — لا بأس، الجلسة من localStorage تكفي
+    console.warn('Firebase sync failed, using local data');
   });
 }
 
-// Always wait for full page load to ensure Firebase SDK is ready
-window.addEventListener('load', () => setTimeout(startApp, 300));
+window.addEventListener('load', () => setTimeout(startApp, 100));
 </script>
 </body>
 </html>
