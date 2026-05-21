@@ -2253,7 +2253,8 @@ function renderCashRulesInputs() {
       + '<span style="font-size:11px;color:#374151;font-weight:600;white-space:nowrap;">سعر البيع</span>'
       + '<input type="number" style="width:85px;padding:5px 8px;border:1.5px solid #e5e7eb;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;text-align:center;" '
       + 'value="' + savedVal + '" '
-      + 'onchange="cashRules[' + JSON.stringify(key) + ']=parseFloat(this.value)||0; updateCashPreview();">'
+      + 'data-key="' + key.replace(/"/g, '&quot;') + '" '
+      + 'onchange="var k=this.dataset.key;cashRules[k]=parseFloat(this.value)||0;updateCashPreview();">'
       + '<span style="font-size:11px;color:#9ca3af;">' + SAR + '</span>'
       + '</div></div>';
   }).join('');
@@ -2267,7 +2268,12 @@ function renderCashTab() {
     if (!locMap[r.Location]) locMap[r.Location] = { loc: r.Location, staff: r.STAFF_NO, units: 0, cashBefore: 0 };
     locMap[r.Location].units += r.Count || 1;
     const addonVal = r.Addon_Value || 0;
-    const cashVal = cashRules[addonVal] !== undefined ? cashRules[addonVal] : addonVal;
+    const pk       = r.PK || '';
+    const compKey  = pk + '|' + addonVal;
+    // try composite key first, then addonVal only, then addonVal as fallback
+    const cashVal  = cashRules[compKey] !== undefined ? cashRules[compKey]
+                   : cashRules[addonVal] !== undefined ? cashRules[addonVal]
+                   : addonVal;
     locMap[r.Location].cashBefore += cashVal * (r.Count || 1);
   }
   const locs = Object.values(locMap).sort((a,b)=>b.cashBefore-a.cashBefore);
